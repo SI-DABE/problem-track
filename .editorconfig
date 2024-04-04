@@ -1,0 +1,17 @@
+# https://editorconfig.org/
+# Indicates that this is the root EditorConfig file for the project
+# This means that these configurations apply to all files in this directory and its subdirectories
+root = true
+
+# Set default formatting options for all files
+[*]
+charset = utf-8
+indent_size = 2
+indent_style = space # Use spaces for indentation
+end_of_line = lf # Line endings are LF (Unix-style)
+insert_final_newline = true # Insert a final newline at the end of the file
+trim_trailing_whitespace = true # Trim trailing whitespace at the end of lines
+
+# Set specific formatting options for HTML files
+[*.{html}]
+indent_size = 4
