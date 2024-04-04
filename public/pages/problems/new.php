@@ -32,39 +32,19 @@
         <section class="offset-3 col-9 px-4">
             <header class="mb-3">
                 <h1>
-                    Problemas registrados
+                    Novo Problema
                 </h1>
             </header>
 
-            <div class="row">
-                <div class="col-8 mb-3">
-                    <div class="input-group">
-                        <input type="text" class="form-control" placeholder="Procurar problemas" aria-label="Recipient's username" aria-describedby="button-addon2">
-                        <button class="btn btn-outline-primary" type="button">
-                            Pesquisar...
-                        </button>
-                    </div>
+            <form>
+                <div class="mb-3">
+                    <label for="problem_title" class="form-label">Título:</label>
+                    <input type="text" name="problem[title]" class="form-control" id="problem_title">
                 </div>
-                <div class="col-4">
-                    <a href="/pages/problems/new.php" class="btn btn-outline-primary">
-                        <i class="fe fe-plus"></i>
-                        Registrar Problema
-                    </a>
-                </div>
-            </div>
 
-            <table class="table">
-                <thead>
-                    <th>ID</th>
-                    <th>Nome</th>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>#1</td>
-                        <td>Porta dos fundos bloco B não fecha</td>
-                    </tr>
-                </tbody>
-            </table>
+                <button type="submit" class="btn btn-primary">Registrar</button>
+            </form>
+
         </section>
     </main>
 </body>
