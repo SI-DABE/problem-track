@@ -1,0 +1,11 @@
+<form action="update.php" method="POST" class="<?= empty($errors) ? '' : 'was-validated' ?>" novalidate>
+    <input type="hidden" name="_method" value="PUT">
+    <input type="hidden" name="problem[id]" value="<?= $problem['id'] ?>">
+    <div class="mb-3">
+        <label for="problem_title" class="form-label">Título:</label>
+        <input type="text" name="problem[title]" class="form-control" id="problem_title" value="<?= $problem['title'] ?>" required>
+        <div class="invalid-feedback"><?= isset($errors['title']) ? $errors['title'] : '' ?></div>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Registrar</button>
+</form>

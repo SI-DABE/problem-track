@@ -19,12 +19,18 @@
     <thead>
         <th>ID</th>
         <th>Título</th>
+        <th></th>
     </thead>
     <tbody>
         <?php foreach ($problems as $index => $problem) : ?>
             <tr>
                 <td><a href="/pages/problems/show.php?id=<?= $index ?>">#<?= $index ?></a></td>
                 <td><?= $problem ?></td>
+                <td>
+                    <a href="/pages/problems/edit.php?id=<?= $index ?>">
+                        <i class=" bi bi-pencil-square"></i>
+                    </a>
+                </td>
             </tr>
         <?php endforeach; ?>
     </tbody>
