@@ -18,12 +18,14 @@
 <table class="table">
     <thead>
         <th>ID</th>
-        <th>Nome</th>
+        <th>Título</th>
     </thead>
     <tbody>
-        <tr>
-            <td>#1</td>
-            <td>Porta dos fundos bloco B não fecha</td>
-        </tr>
+        <?php foreach ($problems as $index => $problem) : ?>
+            <tr>
+                <td><a href="/pages/problems/show.php?id=<?= $index ?>">#<?= $index ?></a></td>
+                <td><?= $problem ?></td>
+            </tr>
+        <?php endforeach; ?>
     </tbody>
 </table>
