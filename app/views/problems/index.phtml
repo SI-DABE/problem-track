@@ -27,9 +27,16 @@
                 <td><a href="/pages/problems/show.php?id=<?= $index ?>">#<?= $index ?></a></td>
                 <td><?= $problem ?></td>
                 <td>
-                    <a href="/pages/problems/edit.php?id=<?= $index ?>">
-                        <i class=" bi bi-pencil-square"></i>
-                    </a>
+                    <div class="d-flex flex-row-reverse">
+                        <form action="delete.php" method="POST" class="m-0">
+                            <input type="hidden" name="_method" value="DELETE">
+                            <input type="hidden" name="problem[id]" value="<?= $index ?>">
+                            <button type="submit" class="btn btn-link"><i class="bi bi-archive"></i></button>
+                        </form>
+                        <a href="/pages/problems/edit.php?id=<?= $index ?>" class="btn btn-link pe-0">
+                            <i class="bi bi-pencil-square"></i>
+                        </a>
+                    </div>
                 </td>
             </tr>
         <?php endforeach; ?>
