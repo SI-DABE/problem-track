@@ -1,8 +1,7 @@
 <?php
+require '/var/www/app/models/Problem.php';
 
-define('DB_PATH', '/var/www/database/problems.txt');
-
-$problems = file(DB_PATH, FILE_IGNORE_NEW_LINES);
+$problems = Problem::all();
 
 $title = 'Problemas Registrados';
 $view = '/var/www/app/views/problems/index.phtml';
