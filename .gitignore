@@ -2,7 +2,7 @@
 .vscode/
 
 # Ignore HTML folder
-.html/
+html
 
 # Ignore logs and temporay files
 *.log

@@ -1,6 +1,5 @@
 Porta dos fundos bloco B não fecha e não abre
 Novo problem 1
-
-testes
 Trocar o datashow da sala B12
 Novo problema
+Novo registro
