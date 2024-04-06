@@ -3,3 +3,5 @@ Novo problem 1
 Trocar o datashow da sala B12
 Novo problema
 Novo registro
+Registro sem erros
+Computador estragado

@@ -1,5 +1,4 @@
 <?php
-
 require '/var/www/app/models/Problem.php';
 
 $method = $_SERVER['REQUEST_METHOD'];

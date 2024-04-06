@@ -1,8 +1,8 @@
-<form action="create.php" method="POST" class="<?= empty($errors) ? '' : 'was-validated' ?>" novalidate>
+<form action="create.php" method="POST" class="<?= $problem->hasErrors() ? '' : 'was-validated' ?>" novalidate>
     <div class="mb-3">
         <label for="problem_title" class="form-label">Título:</label>
         <input type="text" name="problem[title]" class="form-control" id="problem_title" required>
-        <div class="invalid-feedback"><?= isset($errors['title']) ? $errors['title'] : '' ?></div>
+        <div class="invalid-feedback"><?= $problem->errors('title') ? $problem->errors('title') : '' ?></div>
     </div>
 
     <button type="submit" class="btn btn-primary">Registrar</button>

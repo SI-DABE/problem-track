@@ -27,9 +27,36 @@ class Problem
         return $this->title;
     }
 
-    public function save()
+    public function save(): bool
     {
-        file_put_contents(self::DB_PATH, $this->title . PHP_EOL, FILE_APPEND);
-        return true;
+        if ($this->isValid()) {
+            $this->id = count(file(self::DB_PATH));
+            file_put_contents(self::DB_PATH, $this->title . PHP_EOL, FILE_APPEND);
+            return true;
+        }
+        return false;
+    }
+
+    public function isValid(): bool
+    {
+        $this->errors = [];
+
+        if (empty($this->title))
+            $this->errors['title'] = 'não pode ser vazio!';
+
+        return empty($this->errors);
+    }
+
+    public function hasErrors(): bool
+    {
+        return empty($this->errors);
+    }
+
+    public function errors($index)
+    {
+        if (isset($this->errors[$index]))
+            return $this->errors[$index];
+
+        return null;
     }
 }
