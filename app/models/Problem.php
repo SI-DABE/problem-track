@@ -50,6 +50,15 @@ class Problem
         return false;
     }
 
+    public function destroy()
+    {
+        $problems = file(self::DB_PATH, FILE_IGNORE_NEW_LINES);
+        unset($problems[$this->id]);
+
+        $data = implode(PHP_EOL, $problems);
+        file_put_contents(self::DB_PATH, $data . PHP_EOL);
+    }
+
     public function isValid(): bool
     {
         $this->errors = [];
