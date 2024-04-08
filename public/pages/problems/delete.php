@@ -1,4 +1,5 @@
 <?php
+require '/var/www/app/models/Problem.php';
 
 $method = $_REQUEST['_method'] ?? $_SERVER['REQUEST_METHOD'];
 
@@ -7,16 +8,8 @@ if ($method !== 'DELETE') {
     exit;
 }
 
-$problem = $_POST['problem'];
+$problem = Problem::findById($_POST['problem']['id']);
 
-$id = $problem['id'];
-
-define('DB_PATH', '/var/www/database/problems.txt');
-
-$problems = file(DB_PATH, FILE_IGNORE_NEW_LINES);
-unset($problems[$id]);
-
-$data = implode(PHP_EOL, $problems);
-file_put_contents(DB_PATH, $data . PHP_EOL);
+$problem->destroy();
 
 header('Location: /pages/problems');

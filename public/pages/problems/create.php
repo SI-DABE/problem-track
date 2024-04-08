@@ -1,4 +1,5 @@
 <?php
+require '/var/www/app/models/Problem.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
 
@@ -7,19 +8,10 @@ if ($method !== 'POST') {
     exit;
 }
 
-$problem = $_POST['problem'];
-$title = trim($problem['title']);
+$params = $_POST['problem'];
+$problem = new Problem(title: $params['title']);
 
-$errors = [];
-
-if (empty($title))
-    $errors['title'] = 'não pode ser vazio!';
-
-
-if (empty($errors)) {
-    define('DB_PATH', '/var/www/database/problems.txt');
-    file_put_contents(DB_PATH, $title . PHP_EOL, FILE_APPEND);
-
+if ($problem->save()) {
     header('Location: /pages/problems');
 } else {
     $title = 'Novo Problema';

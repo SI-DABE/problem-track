@@ -1,3 +1,3 @@
 <?php
 
-header('Location: /pages/problems/index.php');
+header('Location: /pages/problems');
