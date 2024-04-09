@@ -59,6 +59,15 @@ class Problem
         file_put_contents(self::DB_PATH, $data . PHP_EOL);
     }
 
+    public static function search(string $search): array
+    {
+        $problems = self::all();
+
+        return array_filter($problems, function ($problem) use ($search) {
+            return strpos($problem->getTitle(), $search) !== false;
+        });
+    }
+
     public function isValid(): bool
     {
         $this->errors = [];

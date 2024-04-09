@@ -91,6 +91,14 @@ class ProblemsController
         $this->redirectTo('/pages/problems');
     }
 
+    public function search()
+    {
+        $problems = Problem::search($_GET['search']);
+
+        $title = 'Problemas Encontrados';
+        $this->render('index', compact('problems', 'title'));
+    }
+
 
     private function render($view, $data = [])
     {
