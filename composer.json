@@ -1,0 +1,9 @@
+{
+    "name": "root/app",
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/"
+        }
+    },
+    "require": {}
+}

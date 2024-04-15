@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Models;
+
 class Problem
 {
     const DB_PATH = '/var/www/database/problems.txt';

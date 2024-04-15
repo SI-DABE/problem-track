@@ -9,12 +9,19 @@ services:
       - 80:80
     networks:
       - app-network
+
   php:
     image: php:8.3.4-fpm
     volumes:
       - .:/var/www
     networks:
       - app-network
+
+  composer:
+    image: composer:2.7.2
+    user: 1000:1000
+    volumes:
+      - .:/app
 
 networks:
   app-network:
