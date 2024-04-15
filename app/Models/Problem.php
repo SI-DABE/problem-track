@@ -89,6 +89,8 @@ class Problem
 
     public static function all(): array
     {
+        if (!file_exists(self::DB_PATH())) return [];
+
         $problems = file(self::DB_PATH(), FILE_IGNORE_NEW_LINES);
 
         return array_map(function ($line, $title) {
