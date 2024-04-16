@@ -5,8 +5,6 @@ namespace Tests;
 use Core\Constants\Constants;
 use PHPUnit\Framework\TestCase as FrameworkTestCase;
 
-require dirname(__DIR__) . '/core/debug/functions.php';
-
 class TestCase extends FrameworkTestCase
 {
     public function setUp(): void
