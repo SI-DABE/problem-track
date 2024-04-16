@@ -14,10 +14,11 @@ class ProblemsController
 
         $title = 'Problemas Registrados';
 
-        if ($this->isJsonRequest())
+        if ($this->isJsonRequest()) {
             $this->renderJson('index', compact('problems', 'title'));
-        else
+        } else {
             $this->render('index', compact('problems', 'title'));
+        }
     }
 
     public function show()
@@ -41,7 +42,9 @@ class ProblemsController
     public function create()
     {
         $method = $_SERVER['REQUEST_METHOD'];
-        if ($method !== 'POST') $this->redirectTo('/pages/problems');
+        if ($method !== 'POST') {
+            $this->redirectTo('/pages/problems');
+        }
 
         $params = $_POST['problem'];
         $problem = new Problem(title: $params['title']);
@@ -67,7 +70,9 @@ class ProblemsController
     public function update()
     {
         $method = $_REQUEST['_method'] ?? $_SERVER['REQUEST_METHOD'];
-        if ($method !== 'PUT') $this->redirectTo('/pages/problems');
+        if ($method !== 'PUT') {
+            $this->redirectTo('/pages/problems');
+        }
 
         $params = $_POST['problem'];
 
@@ -85,7 +90,9 @@ class ProblemsController
     public function destroy()
     {
         $method = $_REQUEST['_method'] ?? $_SERVER['REQUEST_METHOD'];
-        if ($method !== 'DELETE') $this->redirectTo('/pages/problems');
+        if ($method !== 'DELETE') {
+            $this->redirectTo('/pages/problems');
+        }
 
         $problem = Problem::findById($_POST['problem']['id']);
         $problem->destroy();

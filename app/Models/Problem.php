@@ -63,8 +63,9 @@ class Problem
     {
         $this->errors = [];
 
-        if (empty($this->title))
+        if (empty($this->title)) {
             $this->errors['title'] = 'não pode ser vazio!';
+        }
 
         return empty($this->errors);
     }
@@ -81,15 +82,18 @@ class Problem
 
     public function errors($index)
     {
-        if (isset($this->errors[$index]))
+        if (isset($this->errors[$index])) {
             return $this->errors[$index];
+        }
 
         return null;
     }
 
     public static function all(): array
     {
-        if (!file_exists(self::DB_PATH())) return [];
+        if (!file_exists(self::DB_PATH())) {
+            return [];
+        }
 
         $problems = file(self::DB_PATH(), FILE_IGNORE_NEW_LINES);
 
@@ -103,8 +107,9 @@ class Problem
         $problems = self::all();
 
         foreach ($problems as $problem) {
-            if ($problem->getId() === $id)
+            if ($problem->getId() === $id) {
                 return $problem;
+            }
         }
         return null;
     }
