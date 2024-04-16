@@ -6,6 +6,7 @@ use Core\Constants\Constants;
 
 class Problem
 {
+    /** @var array<string, string> */
     private array $errors = [];
 
     public function __construct(
@@ -14,7 +15,7 @@ class Problem
     ) {
     }
 
-    public function setId(int $id)
+    public function setId(int $id): void
     {
         $this->id = $id;
     }
@@ -24,7 +25,7 @@ class Problem
         return $this->id;
     }
 
-    public function setTitle(string $title)
+    public function setTitle(string $title): void
     {
         $this->title = $title;
     }
@@ -52,7 +53,7 @@ class Problem
         return false;
     }
 
-    public function destroy()
+    public function destroy(): void
     {
         $problems = file(self::dbPath(), FILE_IGNORE_NEW_LINES);
         unset($problems[$this->id]);
@@ -82,7 +83,7 @@ class Problem
         return empty($this->errors);
     }
 
-    public function errors($index)
+    public function errors(string $index): string | null
     {
         if (isset($this->errors[$index])) {
             return $this->errors[$index];
@@ -91,6 +92,9 @@ class Problem
         return null;
     }
 
+    /**
+     * @return array<int, Problem>
+     */
     public static function all(): array
     {
         if (!file_exists(self::dbPath())) {
@@ -116,7 +120,7 @@ class Problem
         return null;
     }
 
-    private static function dbPath()
+    private static function dbPath(): string
     {
         return Constants::databasePath()->join($_ENV['DB_NAME']);
     }
