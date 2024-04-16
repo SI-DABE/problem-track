@@ -7,14 +7,14 @@ use Tests\TestCase;
 
 class ProblemTest extends TestCase
 {
-    public function test_can_set_title()
+    public function test_can_set_title(): void
     {
         $problem = new Problem(title: 'Problem 1');
 
         $this->assertEquals('Problem 1', $problem->getTitle());
     }
 
-    public function test_should_create_new_problem()
+    public function test_should_create_new_problem(): void
     {
         $problem = new Problem(title: 'Problem 1');
 

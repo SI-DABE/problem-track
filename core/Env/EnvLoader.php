@@ -6,7 +6,7 @@ use Core\Constants\Constants;
 
 class EnvLoader
 {
-    public static function init()
+    public static function init(): void
     {
         $envs = parse_ini_file(Constants::rootPath()->join('.env'));
 
