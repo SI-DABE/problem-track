@@ -1,0 +1,10 @@
+parameters:
+
+  level: 6
+  paths:
+    - app
+    - core
+    - tests
+
+  excludePaths:
+    - app/views/*
