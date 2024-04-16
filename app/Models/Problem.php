@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Core\Constants\Constants;
+
 class Problem
 {
     private array $errors = [];
@@ -116,6 +118,6 @@ class Problem
 
     private static function DB_PATH()
     {
-        return DATABASE_PATH . $_ENV['DB_NAME'];
+        return Constants::databasePath()->join($_ENV['DB_NAME']);
     }
 }
