@@ -32,7 +32,7 @@ $ chmod 665 ./database/problems.txt
 #### Install the dependencies
 
 ```
-$ docker compose run --rm composer install
+$ ./run composer install
 ```
 
 #### Up the containers
@@ -41,10 +41,36 @@ $ docker compose run --rm composer install
 $ docker compose up -d
 ```
 
+ou
+
+```
+$ ./run up -d
+```
+
 #### Run the tests
 
 ```
 $ docker compose run --rm php ./vendor/bin/phpunit tests --color
+```
+
+ou
+
+```
+$ ./run test
+```
+
+#### Run the linters
+
+[PHPCS](https://github.com/PHPCSStandards/PHP_CodeSniffer/)
+
+```
+$ ./run phpcs
+```
+
+[PHPStan](https://phpstan.org/)
+
+```
+$ ./run phpstan
 ```
 
 Access [localhost](http://localhost)

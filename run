@@ -1,0 +1,58 @@
+#!/usr/bin/bash
+
+set -o errexit
+set -o pipefail
+
+function ps {
+    docker compose ps
+}
+
+function up {
+    docker compose up "${@}"
+}
+
+function down {
+    docker compose down "${@}"
+}
+
+function composer {
+    docker run --rm --interactive --tty           \
+     -e COMPOSER_CACHE_DIR="/app/.cache/composer" \
+     -u "$(id -u):$(id -g)" -v "$(pwd):/app"      \
+     -w /app composer:2.7.2 composer "${@}"
+}
+
+function nginx:check {
+    docker compose exec web nginx -t
+}
+
+function nginx:status {
+    docker compose exec web service nginx status
+}
+
+function nginx:reload {
+   docker compose exec web nginx -s reload
+}
+
+function test {
+   TEST_PATH="${@:-tests}"
+   docker compose run --rm php ./vendor/bin/phpunit --color ${TEST_PATH}
+}
+
+function phpcs {
+   TEST_PATH="${@:-.}"
+   docker compose run --rm php ./vendor/bin/phpcs ${TEST_PATH}
+}
+
+function phpcbf {
+   TEST_PATH="${@:-.}"
+   docker compose run --rm php ./vendor/bin/phpcbf ${TEST_PATH}
+}
+
+function phpstan {
+   TEST_PATH="${@:-}"
+   docker compose run --rm php ./vendor/bin/phpstan ${TEST_PATH}
+}
+
+TIMEFORMAT=$'\nTask completed in %3lR'
+time ${@}
