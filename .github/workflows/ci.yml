@@ -1,0 +1,42 @@
+name: Continous Integration
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Composer install
+        run: ./run composer install
+
+      - name: PHPUnit
+        run: ./run test
+
+  code_quality:
+    name: Code Quality Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Composer install
+        run: ./run composer install
+
+      - name: PSR-4 Checker
+        run: ./run composer dump-autoload --optimize --strict-psr
+
+      - name: PHPCS
+        run: ./run phpcs
+
+      - name: PHPStan
+        run: ./run phpstan
