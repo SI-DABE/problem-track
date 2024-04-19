@@ -23,7 +23,7 @@ Issue: **#ISSUE_NUMBER**
 - [ ] docs: Documentation only changes
 - [ ] style: Changes that do not affect the meaning of the code (e.g. prettier format)
 - [ ] ci: Changes to our CI configuration files and scripts
-- [ ] chore: Changes to the build process or auxiliary tools and librariesfunctionality to not work as expected)
+- [ ] chore: Changes to the build process or auxiliary tools and libraries functionality to not work as expected
 
 ---
 
