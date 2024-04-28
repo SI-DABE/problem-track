@@ -1,3 +1,5 @@
 <?php
 
-header('Location: /pages/problems');
+echo 'Página que recebe todas requisições';
+
+// header('Location: /pages/problems');
