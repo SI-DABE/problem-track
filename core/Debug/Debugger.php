@@ -18,7 +18,7 @@ class Debugger
         exit;
     }
 
-    private static function dump($value)
+    private static function dump(mixed $value): string
     {
         ob_start();
         var_dump($value);

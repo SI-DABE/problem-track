@@ -2,7 +2,7 @@
 
 use Core\Debug\Debugger;
 
-function dd()
+function dd(): void
 {
     Debugger::dd(...func_get_args());
 }
