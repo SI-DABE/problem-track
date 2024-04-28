@@ -8,7 +8,9 @@ class Debugger
     {
         $str = '';
         foreach (func_get_args() as $index => $value) {
-            if ($index !== 0) $str .= '<hr>';
+            if ($index !== 0) {
+                $str .= '<hr>';
+            }
 
             $str .= highlight_string('<?php ' . self::dump($value) . '?>', true);
         }
