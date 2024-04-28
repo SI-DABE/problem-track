@@ -1,6 +1,9 @@
 {
     "name": "root/app",
     "autoload": {
+        "files": [
+            "core/helpers.php"
+        ],
         "psr-4": {
             "App\\": "app/",
             "Tests\\": "tests/",
