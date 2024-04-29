@@ -1,5 +1,3 @@
 <?php
 
-echo 'Página que recebe todas requisições';
-
-// header('Location: /pages/problems');
+require __DIR__ . '/../config/bootstrap.php';
