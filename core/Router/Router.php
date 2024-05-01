@@ -3,6 +3,7 @@
 namespace Core\Router;
 
 use Core\Constants\Constants;
+use Core\Http\Request;
 use Exception;
 
 class Router
@@ -47,16 +48,15 @@ class Router
 
     public function dispatch(): object|bool
     {
-        $method = $_REQUEST['_method'] ?? $_SERVER['REQUEST_METHOD'];
-        $uri = $_SERVER['REQUEST_URI'];
+        $request = new Request();
 
         foreach ($this->routes as $route) {
-            if ($route->match($method, $uri)) {
+            if ($route->match($request)) {
                 $class = $route->getControllerName();
                 $action = $route->getActionName();
 
                 $controller = new $class();
-                $controller->$action();
+                $controller->$action($request);
 
                 return $controller;
             }

@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\Problem;
+use Core\Http\Request;
 
 class ProblemsController
 {
@@ -39,18 +40,13 @@ class ProblemsController
         $this->render('new', compact('problem', 'title'));
     }
 
-    public function create(): void
+    public function create(Request $request): void
     {
-        $method = $_SERVER['REQUEST_METHOD'];
-        if ($method !== 'POST') {
-            $this->redirectTo('/pages/problems');
-        }
-
-        $params = $_POST['problem'];
-        $problem = new Problem(title: $params['title']);
+        $params = $request->getParams();
+        $problem = new Problem(title: $params['problem']['title']);
 
         if ($problem->save()) {
-            $this->redirectTo('/pages/problems');
+            $this->redirectTo(route('problems.index'));
         } else {
             $title = 'Novo Problema';
             $this->render('new', compact('problem', 'title'));
