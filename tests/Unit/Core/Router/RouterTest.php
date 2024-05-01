@@ -58,4 +58,31 @@ class RouterTest extends TestCase
         });
         $this->assertEmpty($output);
     }
+
+    public function test_should_return_a_route_after_add(): void
+    {
+        $router = Router::getInstance();
+        $route = $router->addRoute(new Route('GET', '/test', MockController::class, 'action'));
+
+        $this->assertInstanceOf(Route::class, $route);
+    }
+
+    public function test_should_get_route_path_by_name(): void
+    {
+        $router = Router::getInstance();
+        $router->addRoute(new Route('GET', '/test', MockController::class, 'action'))->name('test');
+        $router->addRoute(new Route('GET', '/test-1', MockController::class, 'action'))->name('test.one');
+
+        $this->assertEquals('/test', $router->getRoutePathByName('test'));
+        $this->assertEquals('/test-1', $router->getRoutePathByName('test.one'));
+    }
+
+    public function test_should_return_an_exception_if_the_name_does_not_exist(): void
+    {
+        $router = Router::getInstance();
+        $router->addRoute(new Route('GET', '/test', MockController::class, 'action'))->name('test');
+
+        $this->expectException(\Exception::class);
+        $router->getRoutePathByName('not-found');
+    }
 }

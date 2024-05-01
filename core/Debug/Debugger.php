@@ -8,14 +8,21 @@ class Debugger
     {
         $str = '';
         foreach (func_get_args() as $index => $value) {
-            if ($index !== 0) {
-                $str .= '<hr>';
-            }
-
-            $str .= highlight_string('<?php ' . self::dump($value) . '?>', true);
+            $str .= self::highlightVariableIfHTTPRequest($value, ($index !== 0));
         }
         echo str_replace(['&lt;?php', '?&gt;'], '', $str);
         exit;
+    }
+
+    public static function highlightVariableIfHTTPRequest(mixed $value, bool $hr): string
+    {
+        if (isset($_SERVER['REQUEST_METHOD'])) {
+            $hr = $hr ? '<hr>' : '';
+
+            return highlight_string('<?php ' . $hr . self::dump($value) . '?>', true);
+        }
+
+        return self::dump($value);
     }
 
     private static function dump(mixed $value): string
