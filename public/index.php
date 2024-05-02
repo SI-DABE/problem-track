@@ -1,3 +1,3 @@
 <?php
 
-header('Location: /pages/problems');
+require __DIR__ . '/../config/bootstrap.php';

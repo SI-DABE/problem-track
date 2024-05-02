@@ -2,6 +2,8 @@
 
 namespace Core\Errors;
 
+use Core\Exceptions\HTTPException;
+
 class ErrorsHandler
 {
     public static function init(): void
@@ -21,11 +23,17 @@ class ErrorsHandler
         return function ($e) {
             ob_end_clean(); // Discard the buffered output
 
-            header('HTTP/1.1 500 Internal Server Error');
+            if ($e instanceof HTTPException) {
+                header('HTTP/1.1 ' . $e->getStatusCode() . ' ' . $e->getMessage());
+            } else {
+                header('HTTP/1.1 500 Internal Server Error');
+            }
 
             echo <<<HTML
                 <h1>{$e->getMessage()}</h1>
-                Uncaught exception class: {get_class($e)}<br>
+                <pre>
+                Uncaught exception class: {get_class($e)}
+                </pre>
                 Message: <strong>{$e->getMessage()}</strong><br>
                 File: {$e->getFile()}<br>
                 Line: {$e->getLine()}<br>

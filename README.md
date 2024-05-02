@@ -78,5 +78,5 @@ Access [localhost](http://localhost)
 ### Teste de API
 
 ```shell
-curl -H "Accept: application/json" localhost/pages/problems/index.php
+curl -H "Accept: application/json" localhost/problems
 ```

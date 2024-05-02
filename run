@@ -34,6 +34,10 @@ function nginx:reload {
    docker compose exec web nginx -s reload
 }
 
+function php:console {
+    docker compose exec php php -a
+}
+
 function test {
    TEST_PATH="${@:-tests}"
    docker compose run --rm php ./vendor/bin/phpunit --color ${TEST_PATH}

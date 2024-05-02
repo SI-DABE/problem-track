@@ -8,7 +8,7 @@
         </div>
     </div>
     <div class="col-4">
-        <a href="/pages/problems/new.php" class="btn btn-outline-primary">
+        <a href="<?= route('problems.new') ?>" class="btn btn-outline-primary">
             <i class="fe fe-plus"></i>
             Registrar Problema
         </a>
@@ -24,16 +24,15 @@
     <tbody>
         <?php foreach ($problems as $problem) : ?>
             <tr>
-                <td><a href="/pages/problems/show.php?id=<?= $problem->getId() ?>">#<?= $problem->getId() ?></a></td>
+                <td><a href="<?= route('problems.show', ['id' => $problem->getId()]) ?>">#<?= $problem->getId() ?></a></td>
                 <td><?= $problem->getTitle() ?></td>
                 <td>
                     <div class="d-flex flex-row-reverse">
-                        <form action="delete.php" method="POST" class="m-0">
+                        <form action="<?= route('problems.destroy', ['id' => $problem->getId()]) ?>" method="POST" class="m-0">
                             <input type="hidden" name="_method" value="DELETE">
-                            <input type="hidden" name="problem[id]" value="<?= $problem->getId() ?>">
                             <button type="submit" class="btn btn-link"><i class="bi bi-archive"></i></button>
                         </form>
-                        <a href="/pages/problems/edit.php?id=<?= $problem->getId() ?>" class="btn btn-link pe-0">
+                        <a href="<?= route('problems.edit', ['id' => $problem->getId()]) ?>" class="btn btn-link pe-0">
                             <i class="bi bi-pencil-square"></i>
                         </a>
                     </div>
