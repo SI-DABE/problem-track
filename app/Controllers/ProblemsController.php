@@ -9,13 +9,13 @@ class ProblemsController
 {
     private string $layout = 'application';
 
-    public function index(): void
+    public function index(Request $request): void
     {
         $problems = Problem::all();
 
         $title = 'Problemas Registrados';
 
-        if ($this->isJsonRequest()) {
+        if ($request->acceptJson()) {
             $this->renderJson('index', compact('problems', 'title'));
         } else {
             $this->render('index', compact('problems', 'title'));
@@ -119,10 +119,5 @@ class ProblemsController
     {
         header('Location: ' . $location);
         exit;
-    }
-
-    private function isJsonRequest(): bool
-    {
-        return (isset($_SERVER['HTTP_ACCEPT']) && $_SERVER['HTTP_ACCEPT'] === 'application/json');
     }
 }
