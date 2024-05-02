@@ -44,17 +44,46 @@ class Router
     {
         foreach ($this->routes as $route) {
             if ($route->getName() === $name) {
-                $keys = array_map(function ($key) {
-                    return '{' . $key . '}';
-                }, array_keys($params));
+                $routePath = $route->getUri();
+                $routePath = $this->replaceRouteParams($routePath, $params);
+                $routePath = $this->appendQueryParams($routePath, $params);
 
-                $values = array_values($params);
-
-                return str_replace($keys, $values, $route->getUri());
+                return $routePath;
             }
         }
 
         throw new Exception("Route with name $name not found", 500);
+    }
+
+    /**
+     * @param string $routePath
+     * @param mixed[] $params
+     * @return string
+     */
+    private function replaceRouteParams(string $routePath, &$params): string
+    {
+        foreach ($params as $param => $value) {
+            $routeParam = '{' . $param . '}';
+            if (strPos($routePath, $routeParam) !== false) {
+                $routePath = str_replace($routeParam, $value, $routePath);
+                unset($params[$param]);
+            }
+        }
+
+        return $routePath;
+    }
+
+    /**
+     * @param string $routePath
+     * @param mixed[] $params
+     * @return string
+     */
+    private function appendQueryParams(string $routePath, $params): string
+    {
+        if (!empty($params)) {
+            $routePath .= '?' . http_build_query($params);
+        }
+        return $routePath;
     }
 
     public function dispatch(): object|bool
