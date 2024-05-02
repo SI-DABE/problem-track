@@ -35,11 +35,22 @@ class Router
         return $route;
     }
 
-    public function getRoutePathByName(string $name): string
+    /**
+     * @param string $name
+     * @param mixed[] $params
+     * @return string
+     */
+    public function getRoutePathByName(string $name, array $params = []): string
     {
         foreach ($this->routes as $route) {
             if ($route->getName() === $name) {
-                return $route->getUri();
+                $keys = array_map(function ($key) {
+                    return '{' . $key . '}';
+                }, array_keys($params));
+
+                $values = array_values($params);
+
+                return str_replace($keys, $values, $route->getUri());
             }
         }
 

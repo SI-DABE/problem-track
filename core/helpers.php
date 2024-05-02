@@ -11,8 +11,13 @@ if (!function_exists('d')) {
 }
 
 if (!function_exists('route')) {
-    function route(string $name): string
+    /**
+     * @param string $name
+     * @param mixed[] $params
+     * @return string
+     */
+    function route(string $name, $params = []): string
     {
-        return Router::getInstance()->getRoutePathByName($name);
+        return Router::getInstance()->getRoutePathByName($name, $params);
     }
 }

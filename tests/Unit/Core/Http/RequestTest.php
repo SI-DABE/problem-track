@@ -12,19 +12,25 @@ class RequestTest extends TestCase
     {
         parent::setUp();
         require_once Constants::rootPath()->join('tests/Unit/Core/Http/header_mock.php');
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $_SERVER['REQUEST_URI'] = '/test';
+    }
+
+    public function tearDown(): void
+    {
+        $_REQUEST = [];
+        unset($_SERVER['REQUEST_METHOD']);
+        unset($_SERVER['REQUEST_URI']);
     }
 
     public function test_should_return_method(): void
     {
-        $_SERVER['REQUEST_METHOD'] = 'GET';
-        $_SERVER['REQUEST_URI'] = '/test';
         $request = new Request();
         $this->assertEquals('GET', $request->getMethod());
     }
 
     public function test_should_return_uri(): void
     {
-        $_SERVER['REQUEST_URI'] = '/test';
         $request = new Request();
         $this->assertEquals('/test', $request->getUri());
     }
@@ -40,5 +46,21 @@ class RequestTest extends TestCase
     {
         $request = new Request();
         $this->assertEquals(getallheaders(), $request->getHeaders());
+    }
+
+    public function test_add_params_should_add_the_params(): void
+    {
+        $request = new Request();
+        $params = ['id' => 1];
+
+        $this->assertEmpty($request->getParams());
+        $request->addParams($params);
+
+        $this->assertEquals($params, $request->getParams());
+
+        $otherParams = ['user_id' => 1];
+        $request->addParams($otherParams);
+
+        $this->assertEquals(array_merge($params, $otherParams), $request->getParams());
     }
 }

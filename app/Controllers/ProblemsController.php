@@ -22,13 +22,13 @@ class ProblemsController
         }
     }
 
-    public function show(): void
+    public function show(Request $request): void
     {
-        $id = intval($_GET['id']);
+        $params = $request->getParams();
 
-        $problem = Problem::findById($id);
+        $problem = Problem::findById($params['id']);
 
-        $title = "Visualização do Problema #{$id}";
+        $title = "Visualização do Problema #{$problem->getId()}";
         $this->render('show', compact('problem', 'title'));
     }
 
@@ -53,47 +53,38 @@ class ProblemsController
         }
     }
 
-    public function edit(): void
+    public function edit(Request $request): void
     {
-        $id = intval($_GET['id']);
+        $params = $request->getParams();
+        $problem = Problem::findById($params['id']);
 
-        $problem = Problem::findById($id);
-
-        $title = "Editar Problema #{$id}";
+        $title = "Editar Problema #{$problem->getId()}";
         $this->render('edit', compact('problem', 'title'));
     }
 
-    public function update(): void
+    public function update(Request $request): void
     {
-        $method = $_REQUEST['_method'] ?? $_SERVER['REQUEST_METHOD'];
-        if ($method !== 'PUT') {
-            $this->redirectTo('/pages/problems');
-        }
-
-        $params = $_POST['problem'];
+        $params = $request->getParams();
 
         $problem = Problem::findById($params['id']);
-        $problem->setTitle($params['title']);
+        $problem->setTitle($params['problem']['title']);
 
         if ($problem->save()) {
-            $this->redirectTo('/pages/problems');
+            $this->redirectTo(route('problems.index'));
         } else {
             $title = "Editar Problema #{$problem->getId()}";
             $this->render('edit', compact('problem', 'title'));
         }
     }
 
-    public function destroy(): void
+    public function destroy(Request $request): void
     {
-        $method = $_REQUEST['_method'] ?? $_SERVER['REQUEST_METHOD'];
-        if ($method !== 'DELETE') {
-            $this->redirectTo('/pages/problems');
-        }
+        $params = $request->getParams();
 
-        $problem = Problem::findById($_POST['problem']['id']);
+        $problem = Problem::findById($params['id']);
         $problem->destroy();
 
-        $this->redirectTo('/pages/problems');
+        $this->redirectTo(route('problems.index'));
     }
 
     /**

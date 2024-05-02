@@ -42,4 +42,10 @@ class Request
     {
         return $this->headers;
     }
+
+    /** @param mixed[] $params*/
+    public function addParams(array $params): void
+    {
+        $this->params = array_merge($this->params, $params);
+    }
 }
