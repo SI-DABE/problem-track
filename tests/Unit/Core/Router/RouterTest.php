@@ -3,6 +3,7 @@
 namespace Tests\Unit\Core\Router;
 
 use Core\Constants\Constants;
+use Core\Exceptions\HTTPException;
 use Core\Router\Route;
 use Core\Router\Router;
 use Tests\TestCase;
@@ -67,10 +68,8 @@ class RouterTest extends TestCase
         $_SERVER['REQUEST_METHOD'] = 'GET';
         $_SERVER['REQUEST_URI'] = '/not-found';
 
-        $output = $this->getOutput(function () use ($router) {
-            $this->assertFalse($router->dispatch());
-        });
-        $this->assertEmpty($output);
+        $this->expectException(HTTPException::class);
+        $router->dispatch();
     }
 
     public function test_should_return_a_route_after_add(): void
