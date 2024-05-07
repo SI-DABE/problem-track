@@ -3,6 +3,8 @@
 set -o errexit
 set -o pipefail
 
+source .env
+
 function ps {
     docker compose ps
 }
@@ -60,6 +62,10 @@ function phpstan {
 
 function git:clean:branchs {
   git branch | grep -v '\*\|master\|main\|develop\|production' | xargs -n 1 git branch -D
+}
+
+function db:console {
+    docker compose exec db sh -c "MYSQL_PWD=${DB_PASSWORD} mysql -u ${DB_USERNAME} ${DB_DATABASE}"
 }
 
 TIMEFORMAT=$'\nTask completed in %3lR'
