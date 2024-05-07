@@ -11,7 +11,9 @@ services:
       - app-network
 
   php:
-    image: php:8.3.4-fpm
+    build:
+      context: .
+      dockerfile: Dockerfile
     working_dir: /var/www
     volumes:
       - .:/var/www

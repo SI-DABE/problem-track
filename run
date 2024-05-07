@@ -65,7 +65,12 @@ function git:clean:branchs {
 }
 
 function db:console {
-    docker compose exec db sh -c "MYSQL_PWD=${DB_PASSWORD} mysql -u ${DB_USERNAME} ${DB_DATABASE}"
+    docker compose exec db sh -c "MYSQL_PWD=${DB_PASSWORD} mysql -u ${DB_USERNAME} ${DB_DATABASE} --default-character-set utf8mb4"
+}
+
+function db:reset {
+    docker compose cp database/schema.sql db:/tmp/
+    docker compose exec db sh -c "MYSQL_PWD=${DB_PASSWORD} mysql -u ${DB_USERNAME} ${DB_DATABASE} --default-character-set utf8mb4 < /tmp/schema.sql"
 }
 
 TIMEFORMAT=$'\nTask completed in %3lR'
