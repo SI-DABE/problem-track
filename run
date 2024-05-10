@@ -73,5 +73,9 @@ function db:reset {
     docker compose exec db sh -c "MYSQL_PWD=${DB_PASSWORD} mysql -u ${DB_USERNAME} ${DB_DATABASE} --default-character-set utf8mb4 < /tmp/schema.sql"
 }
 
+function db:populate {
+    docker compose exec php php database/Populate/populate.php
+}
+
 TIMEFORMAT=$'\nTask completed in %3lR'
 time ${@}
