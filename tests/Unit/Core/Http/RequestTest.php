@@ -75,4 +75,22 @@ class RequestTest extends TestCase
         $_SERVER['HTTP_ACCEPT'] = 'application/html';
         $this->assertFalse($request->acceptJson());
     }
+
+    public function test_get_param_should_return_the_param(): void
+    {
+        $_REQUEST = ['name' => 'John Doe'];
+        $request = new Request();
+
+        $this->assertEquals('John Doe', $request->getParam('name'));
+        $this->assertNull($request->getParam('age'));
+    }
+
+    public function test_get_param_should_return_the_default_value_when_param_not_found(): void
+    {
+        $_REQUEST = ['name' => 'John Doe'];
+        $request = new Request();
+
+        $this->assertEquals('John Doe', $request->getParam('name', 'Jane Doe'));
+        $this->assertEquals('Jane Doe', $request->getParam('age', 'Jane Doe'));
+    }
 }

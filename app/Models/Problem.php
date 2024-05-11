@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Core\Database\Database;
+use Lib\Paginator;
 
 class Problem
 {
@@ -10,8 +11,8 @@ class Problem
     private array $errors = [];
 
     public function __construct(
+        private int $id = -1,
         private string $title = '',
-        private int $id = -1
     ) {
     }
 
@@ -137,5 +138,16 @@ class Problem
         $row = $stmt->fetch();
 
         return new Problem(id: $row['id'], title: $row['title']);
+    }
+
+    public static function paginate(int $page = 1, int $per_page = 10): Paginator
+    {
+        return new Paginator(
+            class: Problem::class,
+            page: $page,
+            per_page: $per_page,
+            table: 'problems',
+            attributes: ['title']
+        );
     }
 }
