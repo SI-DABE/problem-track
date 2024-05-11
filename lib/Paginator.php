@@ -25,6 +25,21 @@ class Paginator
         $this->loadRegisters();
     }
 
+    public function getPage(): int
+    {
+        return $this->page;
+    }
+
+    public function perPage(): int
+    {
+        return $this->per_page;
+    }
+
+    public function totalOfRegistersOfPage(): int
+    {
+        return $this->totalOfRegistersOfPage;
+    }
+
     public function totalOfRegisters(): int
     {
         return $this->totalOfRegisters;
