@@ -22,13 +22,6 @@ $ cd problem-track
 $ cp .env.example .env
 ```
 
-#### Define the file database
-
-```
-$ touch ./database/problems.txt
-$ chmod 665 ./database/problems.txt
-```
-
 #### Install the dependencies
 
 ```
