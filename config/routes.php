@@ -11,6 +11,7 @@ Route::post('/problems', [ProblemsController::class, 'create'])->name('problems.
 
 // Retrieve
 Route::get('/problems', [ProblemsController::class, 'index'])->name('problems.index');
+Route::get('/problems/page/{page}', [ProblemsController::class, 'index'])->name('problems.paginate');
 Route::get('/problems/{id}', [ProblemsController::class, 'show'])->name('problems.show');
 
 // Update

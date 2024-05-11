@@ -3,6 +3,7 @@
 namespace Tests\Unit\Models;
 
 use App\Models\Problem;
+use Lib\Paginator;
 use Tests\TestCase;
 
 class ProblemTest extends TestCase
@@ -20,5 +21,10 @@ class ProblemTest extends TestCase
 
         $this->assertTrue($problem->save());
         $this->assertCount(1, Problem::all());
+    }
+
+    public function test_paginate_should_return_a_paginator(): void
+    {
+        $this->assertInstanceOf(Paginator::class, Problem::paginate());
     }
 }

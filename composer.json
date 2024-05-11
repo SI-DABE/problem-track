@@ -7,7 +7,9 @@
         "psr-4": {
             "App\\": "app/",
             "Tests\\": "tests/",
-            "Core\\": "core/"
+            "Core\\": "core/",
+            "Database\\": "database/",
+            "Lib\\": "lib/"
         }
     },
     "require-dev": {

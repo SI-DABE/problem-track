@@ -11,14 +11,15 @@ class ProblemsController
 
     public function index(Request $request): void
     {
-        $problems = Problem::all();
+        $paginator = Problem::paginate(page: $request->getParam('page', 1));
+        $problems = $paginator->registers();
 
         $title = 'Problemas Registrados';
 
         if ($request->acceptJson()) {
-            $this->renderJson('index', compact('problems', 'title'));
+            $this->renderJson('index', compact('paginator', 'problems', 'title'));
         } else {
-            $this->render('index', compact('problems', 'title'));
+            $this->render('index', compact('paginator', 'problems', 'title'));
         }
     }
 

@@ -53,4 +53,9 @@ class Request
     {
         return (isset($_SERVER['HTTP_ACCEPT']) && $_SERVER['HTTP_ACCEPT'] === 'application/json');
     }
+
+    public function getParam(string $key, mixed $default = null): mixed
+    {
+        return $this->params[$key] ?? $default;
+    }
 }
