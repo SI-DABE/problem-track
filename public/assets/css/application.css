@@ -1,12 +1,20 @@
-nav.top {
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  margin-bottom: 10px;
+body {
+  margin-top: 60px;
+}
+
+#main-content {
+  margin-left: 250px;
+}
+
+nav.navbar {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  background-color: white;
 }
 
 .sidebar {
-  margin-top: 60px;
+  width: 250px;
   position: fixed;
-  top: 0;
+  top: 55px;
   bottom: 0;
   left: 0;
   z-index: 100;
