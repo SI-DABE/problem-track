@@ -14,32 +14,34 @@
 </head>
 
 <body>
-    <nav class="navbar top">
+    <nav class="navbar fixed-top">
         <div class="container-fluid">
             <a class="navbar-brand" href="<?= route('root') ?>">Problem Track</a>
         </div>
     </nav>
 
-    <main class="container-fluid row">
-        <aside class="col-3 sidebar">
-            <nav>
-                <ul class="nav flex-column mt-1">
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?= route('problems.index') ?>">Problemas</a>
-                    </li>
-                </ul>
-            </nav>
-        </aside>
-        <section class="offset-3 col-9 px-4">
-            <header class="mb-3">
-                <h1>
-                    <?= $title ?>
-                </h1>
-            </header>
+    <main class="container-fluid">
+        <div class="row">
+            <aside class="col-auto sidebar">
+                <nav>
+                    <ul class="nav flex-column mt-1">
+                        <li class="nav-item">
+                            <a class="nav-link" href="<?= route('problems.index') ?>">Problemas</a>
+                        </li>
+                    </ul>
+                </nav>
+            </aside>
+            <section id="main-content" class="col">
+                <header class="mb-3">
+                    <h1>
+                        <?= $title ?>
+                    </h1>
+                </header>
 
-            <?php require $view ?>
+                <?php require $view ?>
 
-        </section>
+            </section>
+        </div>
     </main>
 </body>
 
