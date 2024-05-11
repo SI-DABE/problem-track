@@ -11,13 +11,34 @@ services:
       - app-network
 
   php:
-    image: php:8.3.4-fpm
+    build:
+      context: .
+      dockerfile: Dockerfile
     working_dir: /var/www
     volumes:
       - .:/var/www
+    networks:
+      - app-network
+    depends_on:
+      - db
+
+  db:
+    image: mysql:8.4.0
+    env_file:
+      - .env
+    environment:
+      MYSQL_DATABASE: "$DB_DATABASE"
+      MYSQL_USER: "$DB_USERNAME"
+      MYSQL_PASSWORD: "$DB_PASSWORD"
+      MYSQL_ALLOW_EMPTY_PASSWORD: yes
+    volumes:
+      - dbdata:/var/lib/mysql
     networks:
       - app-network
 
 networks:
   app-network:
     driver: bridge
+
+volumes:
+  dbdata:
