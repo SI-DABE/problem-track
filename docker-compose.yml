@@ -19,6 +19,8 @@ services:
       - .:/var/www
     networks:
       - app-network
+    depends_on:
+      - db
 
   db:
     image: mysql:8.4.0
