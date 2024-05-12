@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Models\Problem;
 use Core\Http\Request;
+use Lib\FlashMessage;
 
 class ProblemsController
 {
@@ -47,8 +48,10 @@ class ProblemsController
         $problem = new Problem(title: $params['problem']['title']);
 
         if ($problem->save()) {
+            FlashMessage::success('Problema registrado com sucesso!');
             $this->redirectTo(route('problems.index'));
         } else {
+            FlashMessage::danger('Existem dados incorretos! Por verifique!');
             $title = 'Novo Problema';
             $this->render('new', compact('problem', 'title'));
         }
@@ -71,8 +74,10 @@ class ProblemsController
         $problem->setTitle($params['problem']['title']);
 
         if ($problem->save()) {
+            FlashMessage::success('Problema atualizado com sucesso!');
             $this->redirectTo(route('problems.index'));
         } else {
+            FlashMessage::danger('Existem dados incorretos! Por verifique!');
             $title = "Editar Problema #{$problem->getId()}";
             $this->render('edit', compact('problem', 'title'));
         }
@@ -85,6 +90,7 @@ class ProblemsController
         $problem = Problem::findById($params['id']);
         $problem->destroy();
 
+        FlashMessage::success('Problema removido com sucesso!');
         $this->redirectTo(route('problems.index'));
     }
 
