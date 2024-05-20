@@ -3,12 +3,15 @@
 namespace App\Controllers;
 
 use App\Models\Problem;
+use App\Models\User;
 use Core\Http\Request;
+use Lib\Authentication\Auth;
 use Lib\FlashMessage;
 
 class ProblemsController
 {
     private string $layout = 'application';
+
 
     public function index(Request $request): void
     {

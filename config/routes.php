@@ -1,5 +1,6 @@
 <?php
 
+use App\Controllers\AuthenticationsController;
 use App\Controllers\ProblemsController;
 use Core\Router\Route;
 
@@ -20,3 +21,8 @@ Route::put('/problems/{id}', [ProblemsController::class, 'update'])->name('probl
 
 // Delete
 Route::delete('/problems/{id}', [ProblemsController::class, 'destroy'])->name('problems.destroy');
+
+// Authentication
+Route::get('/login', [AuthenticationsController::class, 'new'])->name('users.login');
+Route::post('/login', [AuthenticationsController::class, 'authenticate'])->name('users.authenticate');
+Route::get('/logout', [AuthenticationsController::class, 'destroy'])->name('users.logout');
