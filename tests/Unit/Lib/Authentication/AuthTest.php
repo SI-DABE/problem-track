@@ -1,5 +1,7 @@
 <?php
 
+namespace Tests\Unit\Lib\Authentication;
+
 use Lib\Authentication\Auth;
 use App\Models\User;
 use Tests\TestCase;
