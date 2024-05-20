@@ -2,9 +2,9 @@
 
 namespace Tests\Browser\Problems;
 
-use Tests\TestCase;
+use PHPUnit\Framework\TestCase as FrameworkTestCase;
 
-class AuthenticatedTest extends TestCase
+class AuthenticatedTest extends FrameworkTestCase
 {
     public function test_should_redirect_if_not_authenticated_to_index(): void
     {
