@@ -12,6 +12,16 @@ class ProblemsController
 {
     private string $layout = 'application';
 
+    private ?User $currentUser = null;
+
+    public function currentUser(): ?User
+    {
+        if ($this->currentUser === null) {
+            $this->currentUser = Auth::user();
+        }
+
+        return $this->currentUser;
+    }
 
     public function index(Request $request): void
     {

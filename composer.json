@@ -9,7 +9,8 @@
             "Tests\\": "tests/",
             "Core\\": "core/",
             "Database\\": "database/",
-            "Lib\\": "lib/"
+            "Lib\\": "lib/",
+            "Config\\": "config/"
         }
     },
     "require-dev": {

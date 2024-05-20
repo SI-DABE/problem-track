@@ -22,19 +22,21 @@ class AuthenticationsController
         $user = User::findByEmail($params['email']);
 
         if ($user && $user->authenticate($params['password'])) {
-            FlashMessage::success('Login realizado com sucesso!');
+            Auth::login($user);
 
-            $this->redirectTo('/problems');
+            FlashMessage::success('Login realizado com sucesso!');
+            $this->redirectTo(route('problems.index'));
         } else {
             FlashMessage::danger('Email e/ou senha inválidos!');
-            $this->redirectTo('/login');
+            $this->redirectTo(route('users.login'));
         }
     }
 
     public function destroy(): void
     {
+        Auth::logout();
         FlashMessage::success('Logout realizado com sucesso!');
-        $this->redirectTo('/login');
+        $this->redirectTo(route('users.login'));
     }
 
 
