@@ -128,4 +128,28 @@ class RouterTest extends TestCase
         $this->expectException(\Exception::class);
         $router->getRoutePathByName('not-found');
     }
+
+    public function test_get_route_size(): void
+    {
+        $router = Router::getInstance();
+        $route = $this->createMock(Route::class);
+
+        $router->addRoute($route);
+        $router->addRoute($route);
+
+        $this->assertEquals(2, $router->getRouteSize());
+    }
+
+    public function test_get_route(): void
+    {
+        $router = Router::getInstance();
+        $route1 = $this->createMock(Route::class);
+        $route2 = $this->createMock(Route::class);
+
+        $router->addRoute($route1);
+        $router->addRoute($route2);
+
+        $this->assertSame($route1, $router->getRoute(0));
+        $this->assertSame($route2, $router->getRoute(1));
+    }
 }

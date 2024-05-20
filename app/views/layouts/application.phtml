@@ -17,6 +17,18 @@
     <nav class="navbar fixed-top">
         <div class="container-fluid">
             <a class="navbar-brand" href="<?= route('root') ?>">Problem Track</a>
+
+            <?php if ($this->currentUser()) : ?>
+                <div class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" aria-expanded="false">
+                        <?= $this->currentUser->getEmail() ?>
+                    </a>
+                    <div class="dropdown-menu">
+                        <a class="dropdown-item" href="<?= route('users.logout') ?>">Sair</a>
+                    </div>
+                </div>
+            <?php endif; ?>
+
         </div>
     </nav>
 

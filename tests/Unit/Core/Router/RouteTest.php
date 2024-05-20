@@ -3,6 +3,7 @@
 namespace Tests\Unit\Core\Router;
 
 use Core\Constants\Constants;
+use Core\Http\Middleware\Middleware;
 use Core\Http\Request;
 use Core\Router\Route;
 use Core\Router\Router;
@@ -188,5 +189,21 @@ class RouteTest extends TestCase
         $_SERVER['REQUEST_URI'] = $uri;
         $_REQUEST = [];
         return new Request();
+    }
+
+    public function test_add_middleware(): void
+    {
+        $route = new Route(method: 'GET', uri: '/test', controllerName: 'MockController', actionName: 'show');
+        $middleware = $this->createMock(Middleware::class);
+
+        $route->addMiddleware($middleware);
+
+        $reflection = new \ReflectionObject($route);
+        $property = $reflection->getProperty('middlewares');
+        $property->setAccessible(true);
+
+        $middlewares = $property->getValue($route);
+
+        $this->assertContains($middleware, $middlewares);
     }
 }
