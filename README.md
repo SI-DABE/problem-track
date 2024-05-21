@@ -40,6 +40,19 @@ ou
 $ ./run up -d
 ```
 
+#### Create database and tables
+
+```
+$ ./run db:reset
+```
+
+#### Populate database
+
+```
+$ ./run db:populate
+```
+
+
 #### Run the tests
 
 ```
