@@ -213,4 +213,45 @@ abstract class Model
             attributes: static::$columns
         );
     }
+
+    public static function where($conditions)
+    {
+        $table = static::$table;
+        $attributes = implode(', ', static::$columns);
+
+        $sql = <<<SQL
+            SELECT id, {$attributes} FROM {$table} WHERE 
+        SQL;
+
+        $sqlConditions = array_map(function ($column) {
+            return "{$column} = :{$column}";
+        }, array_keys($conditions));
+
+        $sql .= implode(' AND ', $sqlConditions);
+
+        $pdo = Database::getDatabaseConn();
+        $stmt = $pdo->prepare($sql);
+
+        foreach ($conditions as $column => $value) {
+            $stmt->bindValue($column, $value);
+        }
+
+        $stmt->execute();
+        $rows = $stmt->fetchAll();
+
+        $models = [];
+        foreach ($rows as $row) {
+            $models[] = new static($row);
+        }
+        return $models;
+    }
+
+    public static function findBy($conditions)
+    {
+        $resp = self::where($conditions);
+        if (isset($resp[0]))
+            return $resp[0];
+
+        return null;
+    }
 }
