@@ -5,13 +5,19 @@ namespace App\Models;
 use Lib\Validations;
 use Core\Database\ActiveRecord\Model;
 
+/**
+ * @property int $id
+ * @property string $name
+ * @property string $email
+ * @property string $encrypted_password
+ */
 class User extends Model
 {
-    protected static $table = 'users';
-    protected static $columns = ['name', 'email', 'encrypted_password'];
+    protected static string $table = 'users';
+    protected static array $columns = ['name', 'email', 'encrypted_password'];
 
-    private ?string $password = null;
-    private ?string $password_confirmation = null;
+    protected ?string $password = null;
+    protected ?string $password_confirmation = null;
 
     public function validates(): void
     {
@@ -36,7 +42,7 @@ class User extends Model
         return User::findBy(['email' => $email]);
     }
 
-    public function __set($property, $value)
+    public function __set(string $property, mixed $value): void
     {
         parent::__set($property, $value);
 

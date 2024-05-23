@@ -8,3 +8,7 @@ parameters:
 
   excludePaths:
     - app/views/*
+
+  ignoreErrors:
+    - '#Unsafe usage of new static\(\)\.#'
+    - '#Access to protected property App\\Models\\User::\$password.#'

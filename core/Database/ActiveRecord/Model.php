@@ -4,6 +4,7 @@ namespace Core\Database\ActiveRecord;
 
 use Core\Database\Database;
 use Lib\Paginator;
+use PDO;
 use ReflectionClass;
 
 abstract class Model
@@ -12,13 +13,15 @@ abstract class Model
     protected array $errors = [];
     protected ?int $id = null;
 
+    /** @var array<string, mixed> */
     private array $attributes = [];
 
-    protected static $table = null;
-    protected static $columns = [];
+    protected static string $table = '';
+    /** @var array<int, string> */
+    protected static array $columns = [];
 
     /**
-     * Model constructor.
+     * @param array<string, mixed> $params
      */
     public function __construct($params = [])
     {
@@ -33,33 +36,37 @@ abstract class Model
     }
 
     /* ------------------- MAGIC METHODS ------------------- */
-    public function __get($property)
+    public function __get(string $property): mixed
     {
-        $reflectedClass = new ReflectionClass($this);
-        if ($reflectedClass->hasProperty($property)) {
-            return $reflectedClass->getProperty($property)->getValue($this);
+        if (property_exists($this, $property)) {
+            return $this->$property;
         }
 
         if (array_key_exists($property, $this->attributes)) {
             return $this->attributes[$property];
         }
+
+        throw new \Exception("Property {$property} not found in " . static::class);
     }
 
-    public function __set($property, $value)
+    public function __set(string $property, mixed $value): void
     {
-        $reflectedClass = new ReflectionClass($this);
-        if ($reflectedClass->hasProperty($property)) {
-            $reflectedClass->getProperty($property)->setValue($this, $value);
-
-            return $this;
+        if (property_exists($this, $property)) {
+            $this->$property = $value;
+            return;
         }
 
         if (array_key_exists($property, $this->attributes)) {
             $this->attributes[$property] = $value;
-            return $this;
+            return;
         }
 
-        return $this;
+        throw new \Exception("Property {$property} not found in " . static::class);
+    }
+
+    public function table(): string
+    {
+        return static::$table;
     }
 
     /* ------------------- VALIDATIONS METHODS ------------------- */
@@ -91,7 +98,7 @@ abstract class Model
         return null;
     }
 
-    public function addError(string $index, string $value)
+    public function addError(string $index, string $value): void
     {
         $this->errors[$index] = $value;
     }
@@ -146,7 +153,7 @@ abstract class Model
         return false;
     }
 
-    public function destroy()
+    public function destroy(): bool
     {
         $table = static::$table;
 
@@ -184,11 +191,14 @@ abstract class Model
             return null;
         }
 
-        $row = $stmt->fetch();
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
         return new static($row);
     }
 
+    /**
+     * @return array<static>
+     */
     public static function all(): array
     {
         $models = [];
@@ -203,7 +213,7 @@ abstract class Model
         $pdo = Database::getDatabaseConn();
         $stmt = $pdo->prepare($sql);
         $stmt->execute();
-        $resp = $stmt->fetchAll();
+        $resp = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         foreach ($resp as $row) {
             $models[] = new static($row);
@@ -223,7 +233,11 @@ abstract class Model
         );
     }
 
-    public static function where($conditions)
+    /**
+     * @param array<string, mixed> $conditions
+     * @return array<static>
+     */
+    public static function where(array $conditions): array
     {
         $table = static::$table;
         $attributes = implode(', ', static::$columns);
@@ -246,7 +260,7 @@ abstract class Model
         }
 
         $stmt->execute();
-        $rows = $stmt->fetchAll();
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         $models = [];
         foreach ($rows as $row) {
@@ -255,7 +269,10 @@ abstract class Model
         return $models;
     }
 
-    public static function findBy($conditions)
+    /**
+     * @param array<string, mixed> $conditions
+     */
+    public static function findBy($conditions): ?static
     {
         $resp = self::where($conditions);
         if (isset($resp[0]))

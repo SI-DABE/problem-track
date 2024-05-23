@@ -125,7 +125,7 @@ class Paginator
         $stmt->bindValue(':offset', $this->offset, PDO::PARAM_INT);
 
         $stmt->execute();
-        $resp = $stmt->fetchAll();
+        $resp = $stmt->fetchAll(PDO::FETCH_ASSOC);
         $this->totalOfRegistersOfPage = $stmt->rowCount();
 
         foreach ($resp as $row) {
