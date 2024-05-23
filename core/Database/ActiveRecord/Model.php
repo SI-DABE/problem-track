@@ -137,6 +137,24 @@ abstract class Model
         return false;
     }
 
+    public function destroy()
+    {
+        $table = static::$table;
+
+        $sql = <<<SQL
+            DELETE FROM {$table} WHERE id = :id;
+        SQL;
+
+        $pdo = Database::getDatabaseConn();
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindValue(':id', $this->id);
+
+        $stmt->execute();
+
+        return ($stmt->rowCount() != 0);
+    }
+
     public static function findById(int $id): static|null
     {
         $pdo = Database::getDatabaseConn();
