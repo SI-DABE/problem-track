@@ -2,152 +2,125 @@
 
 namespace App\Models;
 
-use Core\Database\Database;
-use Lib\Paginator;
+use Core\Database\ActiveRecord\Model;
 
-class Problem
+class Problem extends Model
 {
-    /** @var array<string, string> */
-    private array $errors = [];
+    protected static $table = 'problems';
+    protected static $columns = ['title'];
 
-    public function __construct(
-        private int $id = -1,
-        private string $title = '',
-    ) {
-    }
+    // public function save(): bool
+    // {
+    //     if ($this->isValid()) {
+    //         $pdo = Database::getDatabaseConn();
+    //         if ($this->newRecord()) {
+    //             $sql = 'INSERT INTO problems (title) VALUES (:title);';
+    //             $stmt = $pdo->prepare($sql);
+    //             $stmt->bindParam(':title', $this->title);
 
-    public function setId(int $id): void
-    {
-        $this->id = $id;
-    }
+    //             $stmt->execute();
 
-    public function getId(): int
-    {
-        return $this->id;
-    }
+    //             $this->id = (int) $pdo->lastInsertId();
+    //         } else {
+    //             $sql = 'UPDATE problems SET title = :title WHERE id = :id;';
+    //             $stmt = $pdo->prepare($sql);
+    //             $stmt->bindParam(':title', $this->title);
+    //             $stmt->bindParam(':id', $this->id);
 
-    public function setTitle(string $title): void
-    {
-        $this->title = $title;
-    }
+    //             $stmt->execute();
+    //         }
+    //         return true;
+    //     }
+    //     return false;
+    // }
 
-    public function getTitle(): string
-    {
-        return $this->title;
-    }
+    // public function destroy(): bool
+    // {
+    //     $pdo = Database::getDatabaseConn();
 
-    public function save(): bool
-    {
-        if ($this->isValid()) {
-            $pdo = Database::getDatabaseConn();
-            if ($this->newRecord()) {
-                $sql = 'INSERT INTO problems (title) VALUES (:title);';
-                $stmt = $pdo->prepare($sql);
-                $stmt->bindParam(':title', $this->title);
+    //     $sql = 'DELETE FROM problems WHERE id = :id';
+    //     $stmt = $pdo->prepare($sql);
+    //     $stmt->bindParam(':id', $this->id);
 
-                $stmt->execute();
+    //     $stmt->execute();
 
-                $this->id = (int) $pdo->lastInsertId();
-            } else {
-                $sql = 'UPDATE problems SET title = :title WHERE id = :id;';
-                $stmt = $pdo->prepare($sql);
-                $stmt->bindParam(':title', $this->title);
-                $stmt->bindParam(':id', $this->id);
+    //     return ($stmt->rowCount() !== 0);
+    // }
 
-                $stmt->execute();
-            }
-            return true;
-        }
-        return false;
-    }
+    // public function isValid(): bool
+    // {
+    //     $this->errors = [];
 
-    public function destroy(): bool
-    {
-        $pdo = Database::getDatabaseConn();
+    //     if (empty($this->title)) {
+    //         $this->errors['title'] = 'não pode ser vazio!';
+    //     }
 
-        $sql = 'DELETE FROM problems WHERE id = :id';
-        $stmt = $pdo->prepare($sql);
-        $stmt->bindParam(':id', $this->id);
+    //     return empty($this->errors);
+    // }
 
-        $stmt->execute();
+    // public function newRecord(): bool
+    // {
+    //     return $this->id === -1;
+    // }
 
-        return ($stmt->rowCount() !== 0);
-    }
+    // public function hasErrors(): bool
+    // {
+    //     return empty($this->errors);
+    // }
 
-    public function isValid(): bool
-    {
-        $this->errors = [];
+    // public function errors(string $index): string | null
+    // {
+    //     if (isset($this->errors[$index])) {
+    //         return $this->errors[$index];
+    //     }
 
-        if (empty($this->title)) {
-            $this->errors['title'] = 'não pode ser vazio!';
-        }
+    //     return null;
+    // }
 
-        return empty($this->errors);
-    }
+    // /**
+    //  * @return array<int, Problem>
+    //  */
+    // public static function all(): array
+    // {
+    //     $problems = [];
 
-    public function newRecord(): bool
-    {
-        return $this->id === -1;
-    }
+    //     $pdo = Database::getDatabaseConn();
+    //     $resp = $pdo->query('SELECT id, title FROM problems;');
 
-    public function hasErrors(): bool
-    {
-        return empty($this->errors);
-    }
+    //     foreach ($resp as $row) {
+    //         $problems[] = new Problem(id: $row['id'], title: $row['title']);
+    //     }
 
-    public function errors(string $index): string | null
-    {
-        if (isset($this->errors[$index])) {
-            return $this->errors[$index];
-        }
+    //     return $problems;
+    // }
 
-        return null;
-    }
+    // public static function findById(int $id): Problem|null
+    // {
+    //     $pdo = Database::getDatabaseConn();
 
-    /**
-     * @return array<int, Problem>
-     */
-    public static function all(): array
-    {
-        $problems = [];
+    //     $sql = 'SELECT id, title FROM problems WHERE id = :id';
+    //     $stmt = $pdo->prepare($sql);
+    //     $stmt->bindParam(':id', $id);
 
-        $pdo = Database::getDatabaseConn();
-        $resp = $pdo->query('SELECT id, title FROM problems;');
+    //     $stmt->execute();
 
-        foreach ($resp as $row) {
-            $problems[] = new Problem(id: $row['id'], title: $row['title']);
-        }
+    //     if ($stmt->rowCount() == 0) {
+    //         return null;
+    //     }
 
-        return $problems;
-    }
+    //     $row = $stmt->fetch();
 
-    public static function findById(int $id): Problem|null
-    {
-        $pdo = Database::getDatabaseConn();
+    //     return new Problem(id: $row['id'], title: $row['title']);
+    // }
 
-        $sql = 'SELECT id, title FROM problems WHERE id = :id';
-        $stmt = $pdo->prepare($sql);
-        $stmt->bindParam(':id', $id);
-
-        $stmt->execute();
-
-        if ($stmt->rowCount() == 0) {
-            return null;
-        }
-
-        $row = $stmt->fetch();
-
-        return new Problem(id: $row['id'], title: $row['title']);
-    }
-
-    public static function paginate(int $page = 1, int $per_page = 10): Paginator
-    {
-        return new Paginator(
-            class: Problem::class,
-            page: $page,
-            per_page: $per_page,
-            table: 'problems',
-            attributes: ['title']
-        );
-    }
+    // public static function paginate(int $page = 1, int $per_page = 10): Paginator
+    // {
+    //     return new Paginator(
+    //         class: Problem::class,
+    //         page: $page,
+    //         per_page: $per_page,
+    //         table: 'problems',
+    //         attributes: ['title']
+    //     );
+    // }
 }
