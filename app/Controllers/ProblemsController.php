@@ -3,26 +3,12 @@
 namespace App\Controllers;
 
 use App\Models\Problem;
-use App\Models\User;
+use Core\Http\Controllers\Controller;
 use Core\Http\Request;
-use Lib\Authentication\Auth;
 use Lib\FlashMessage;
 
-class ProblemsController
+class ProblemsController extends Controller
 {
-    private string $layout = 'application';
-
-    private ?User $currentUser = null;
-
-    public function currentUser(): ?User
-    {
-        if ($this->currentUser === null) {
-            $this->currentUser = Auth::user();
-        }
-
-        return $this->currentUser;
-    }
-
     public function index(Request $request): void
     {
         $paginator = Problem::paginate(page: $request->getParam('page', 1));
@@ -31,9 +17,9 @@ class ProblemsController
         $title = 'Problemas Registrados';
 
         if ($request->acceptJson()) {
-            $this->renderJson('index', compact('paginator', 'problems', 'title'));
+            $this->renderJson('problems/index', compact('paginator', 'problems', 'title'));
         } else {
-            $this->render('index', compact('paginator', 'problems', 'title'));
+            $this->render('problems/index', compact('paginator', 'problems', 'title'));
         }
     }
 
@@ -44,7 +30,7 @@ class ProblemsController
         $problem = Problem::findById($params['id']);
 
         $title = "Visualização do Problema #{$problem->id}";
-        $this->render('show', compact('problem', 'title'));
+        $this->render('problems/show', compact('problem', 'title'));
     }
 
     public function new(): void
@@ -52,7 +38,7 @@ class ProblemsController
         $problem = new Problem();
 
         $title = 'Novo Problema';
-        $this->render('new', compact('problem', 'title'));
+        $this->render('problems/new', compact('problem', 'title'));
     }
 
     public function create(Request $request): void
@@ -66,7 +52,7 @@ class ProblemsController
         } else {
             FlashMessage::danger('Existem dados incorretos! Por verifique!');
             $title = 'Novo Problema';
-            $this->render('new', compact('problem', 'title'));
+            $this->render('problems/new', compact('problem', 'title'));
         }
     }
 
@@ -76,7 +62,7 @@ class ProblemsController
         $problem = Problem::findById($params['id']);
 
         $title = "Editar Problema #{$problem->id}";
-        $this->render('edit', compact('problem', 'title'));
+        $this->render('problems/edit', compact('problem', 'title'));
     }
 
     public function update(Request $request): void
@@ -93,7 +79,7 @@ class ProblemsController
         } else {
             FlashMessage::danger('Existem dados incorretos! Por verifique!');
             $title = "Editar Problema #{$problem->id}";
-            $this->render('edit', compact('problem', 'title'));
+            $this->render('problems/edit', compact('problem', 'title'));
         }
     }
 
@@ -106,39 +92,5 @@ class ProblemsController
 
         FlashMessage::success('Problema removido com sucesso!');
         $this->redirectTo(route('problems.index'));
-    }
-
-    /**
-     * @param array<string, mixed> $data
-     */
-    private function render(string $view, array $data = []): void
-    {
-        extract($data);
-
-        $view = '/var/www/app/views/problems/' . $view . '.phtml';
-        require '/var/www/app/views/layouts/' . $this->layout . '.phtml';
-    }
-
-
-    /**
-     * @param array<string, mixed> $data
-     */
-    private function renderJson(string $view, array $data = []): void
-    {
-        extract($data);
-
-        $view = '/var/www/app/views/problems/' . $view . '.json.php';
-        $json = [];
-
-        header('Content-Type: application/json; chartset=utf-8');
-        require $view;
-        echo json_encode($json);
-        return;
-    }
-
-    private function redirectTo(string $location): void
-    {
-        header('Location: ' . $location);
-        exit;
     }
 }
