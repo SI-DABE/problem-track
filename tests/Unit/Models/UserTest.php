@@ -122,8 +122,21 @@ class UserTest extends TestCase
 
     public function test_authenticate_should_return_the_true(): void
     {
-        $this->markTestIncomplete('This test need password refactor.');
         $this->assertTrue($this->user->authenticate('123456'));
         $this->assertFalse($this->user->authenticate('wrong'));
+    }
+
+    public function test_authenticate_should_return_false(): void
+    {
+        $this->assertFalse($this->user->authenticate(''));
+    }
+
+    public function test_update_should_not_change_the_password(): void
+    {
+        $this->user->password = '654321';
+        $this->user->save();
+
+        $this->assertTrue($this->user->authenticate('123456'));
+        $this->assertFalse($this->user->authenticate('654321'));
     }
 }

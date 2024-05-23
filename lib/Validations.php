@@ -18,7 +18,10 @@ class Validations
 
     public static function passwordConfirmation($obj)
     {
-        if ($obj->password !== $obj->password_confirmation) {
+        if (
+            self::notEmpty('password', $obj)
+            && $obj->password !== $obj->password_confirmation
+        ) {
             $obj->addError('password', 'as senhas devem ser idênticas!');
             return false;
         }
