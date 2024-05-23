@@ -43,7 +43,7 @@ class ProblemsController
 
         $problem = Problem::findById($params['id']);
 
-        $title = "Visualização do Problema #{$problem->getId()}";
+        $title = "Visualização do Problema #{$problem->id}";
         $this->render('show', compact('problem', 'title'));
     }
 
@@ -75,7 +75,7 @@ class ProblemsController
         $params = $request->getParams();
         $problem = Problem::findById($params['id']);
 
-        $title = "Editar Problema #{$problem->getId()}";
+        $title = "Editar Problema #{$problem->id}";
         $this->render('edit', compact('problem', 'title'));
     }
 

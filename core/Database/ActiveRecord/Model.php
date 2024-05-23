@@ -4,6 +4,7 @@ namespace Core\Database\ActiveRecord;
 
 use Core\Database\Database;
 use Lib\Paginator;
+use PhpParser\Node\Stmt\Static_;
 use ReflectionClass;
 
 abstract class Model
@@ -53,6 +54,31 @@ abstract class Model
         }
 
         return $this;
+    }
+
+    public static function findById(int $id): static|null
+    {
+        $pdo = Database::getDatabaseConn();
+
+        $attributes = implode(', ', static::$columns);
+        $table = static::$table;
+
+        $sql = <<<SQL
+            SELECT id, {$attributes} FROM {$table} WHERE id = :id;
+        SQL;
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindParam(':id', $id);
+
+        $stmt->execute();
+
+        if ($stmt->rowCount() == 0) {
+            return null;
+        }
+
+        $row = $stmt->fetch();
+
+        return new static($row);
     }
 
     public static function all(): array
