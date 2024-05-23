@@ -11,7 +11,7 @@ class ProblemsPopulate
         $numberOfProblems = 100;
 
         for ($i = 0; $i < $numberOfProblems; $i++) {
-            $problem = new Problem(title: 'Problem ' . $i);
+            $problem = new Problem(['title' => 'Problem ' . $i]);
             $problem->save();
         }
 

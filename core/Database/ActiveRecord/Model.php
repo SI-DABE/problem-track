@@ -4,6 +4,7 @@ namespace Core\Database\ActiveRecord;
 
 use Core\Database\Database;
 use Lib\Paginator;
+use ReflectionClass;
 
 abstract class Model
 {
@@ -26,16 +27,17 @@ abstract class Model
             $this->attributes[$column] = null;
         }
 
-        foreach ($params as $key => $value) {
-            $this->$key = $value;
+        foreach ($params as $property => $value) {
+            $this->__set($property, $value);
         }
     }
 
     /* ------------------- MAGIC METHODS ------------------- */
     public function __get($property)
     {
-        if (property_exists($this, $property)) {
-            return $this->$property;
+        $reflectedClass = new ReflectionClass($this);
+        if ($reflectedClass->hasProperty($property)) {
+            return $reflectedClass->getProperty($property)->getValue($this);
         }
 
         if (array_key_exists($property, $this->attributes)) {
@@ -45,8 +47,10 @@ abstract class Model
 
     public function __set($property, $value)
     {
-        if (property_exists($this, $property)) {
-            $this->$property = $value;
+        $reflectedClass = new ReflectionClass($this);
+        if ($reflectedClass->hasProperty($property)) {
+            $reflectedClass->getProperty($property)->setValue($this, $value);
+
             return $this;
         }
 
