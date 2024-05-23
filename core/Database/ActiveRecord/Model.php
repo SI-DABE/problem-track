@@ -4,13 +4,11 @@ namespace Core\Database\ActiveRecord;
 
 use Core\Database\Database;
 use Lib\Paginator;
-use PhpParser\Node\Stmt\Static_;
-use ReflectionClass;
 
 abstract class Model
 {
     /** @var array<string, string> */
-    private array $errors = [];
+    protected array $errors = [];
     protected ?int $id = null;
 
     private array $attributes = [];
@@ -18,6 +16,9 @@ abstract class Model
     protected static $table = null;
     protected static $columns = [];
 
+    /**
+     * Model constructor.
+     */
     public function __construct($params = [])
     {
         // Initialize attributes with null from database columns
@@ -30,6 +31,7 @@ abstract class Model
         }
     }
 
+    /* ------------------- MAGIC METHODS ------------------- */
     public function __get($property)
     {
         if (property_exists($this, $property)) {
@@ -54,6 +56,85 @@ abstract class Model
         }
 
         return $this;
+    }
+
+    /* ------------------- VALIDATIONS METHODS ------------------- */
+    public function isValid(): bool
+    {
+        $this->errors = [];
+
+        $this->validates();
+
+        return empty($this->errors);
+    }
+
+    public function newRecord(): bool
+    {
+        return $this->id === null;
+    }
+
+    public function hasErrors(): bool
+    {
+        return empty($this->errors);
+    }
+
+    public function errors(string $index): string | null
+    {
+        if (isset($this->errors[$index])) {
+            return $this->errors[$index];
+        }
+
+        return null;
+    }
+
+    public abstract function validates(): void;
+
+    /* ------------------- DATABASE METHODS ------------------- */
+    public function save(): bool
+    {
+        if ($this->isValid()) {
+            $pdo = Database::getDatabaseConn();
+            if ($this->newRecord()) {
+                $table = static::$table;
+                $attributes = implode(', ', static::$columns);
+                $values = ':' . implode(', :', static::$columns);
+
+                $sql = <<<SQL
+                    INSERT INTO {$table} ({$attributes}) VALUES ({$values});
+                SQL;
+
+                $stmt = $pdo->prepare($sql);
+                foreach (static::$columns as $column) {
+                    $stmt->bindValue($column, $this->$column);
+                }
+
+                $stmt->execute();
+
+                $this->id = (int) $pdo->lastInsertId();
+            } else {
+                $table = static::$table;
+
+                $sets = array_map(function ($column) {
+                    return "{$column} = :{$column}";
+                }, static::$columns);
+                $sets = implode(', ', $sets);
+
+                $sql = <<<SQL
+                    UPDATE {$table} set {$sets} WHERE id = :id;
+                SQL;
+
+                $stmt = $pdo->prepare($sql);
+                $stmt->bindValue(':id', $this->id);
+
+                foreach (static::$columns as $column) {
+                    $stmt->bindValue($column, $this->$column);
+                }
+
+                $stmt->execute();
+            }
+            return true;
+        }
+        return false;
     }
 
     public static function findById(int $id): static|null

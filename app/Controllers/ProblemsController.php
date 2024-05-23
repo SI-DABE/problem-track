@@ -58,7 +58,7 @@ class ProblemsController
     public function create(Request $request): void
     {
         $params = $request->getParams();
-        $problem = new Problem(title: $params['problem']['title']);
+        $problem = new Problem($params['problem']);
 
         if ($problem->save()) {
             FlashMessage::success('Problema registrado com sucesso!');
@@ -81,17 +81,18 @@ class ProblemsController
 
     public function update(Request $request): void
     {
-        $params = $request->getParams();
+        $id = $request->getParam('id');
+        $params = $request->getParam('problem');
 
-        $problem = Problem::findById($params['id']);
-        $problem->setTitle($params['problem']['title']);
+        $problem = Problem::findById($id);
+        $problem->title = $params['title'];
 
         if ($problem->save()) {
             FlashMessage::success('Problema atualizado com sucesso!');
             $this->redirectTo(route('problems.index'));
         } else {
             FlashMessage::danger('Existem dados incorretos! Por verifique!');
-            $title = "Editar Problema #{$problem->getId()}";
+            $title = "Editar Problema #{$problem->id}";
             $this->render('edit', compact('problem', 'title'));
         }
     }
