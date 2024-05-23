@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Lib\Validations;
 use Core\Database\ActiveRecord\Model;
 
 class Problem extends Model
@@ -11,8 +12,6 @@ class Problem extends Model
 
     public function validates(): void
     {
-        if ($this->title === '' || $this->title === null) {
-            $this->errors['title'] = 'não pode ser vazio!';
-        }
+        Validations::notEmpty('title', $this);
     }
 }

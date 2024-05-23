@@ -16,7 +16,7 @@ class PaginatorTest extends TestCase
     {
         parent::setUp();
         for ($i = 0; $i < 10; $i++) {
-            $problem = new Problem(title: "Problem $i");
+            $problem = new Problem(['title' => "Problem $i"]);
             $problem->save();
             $this->problems[] = $problem;
         }
@@ -35,7 +35,7 @@ class PaginatorTest extends TestCase
 
     public function test_total_of_pages_when_the_division_is_not_exact(): void
     {
-        $problem = new Problem(title: "Problem 11");
+        $problem = new Problem(['title' => 'Problem 11']);
         $problem->save();
         $this->paginator = new Paginator(Problem::class, 1, 5, 'problems', ['title']);
 

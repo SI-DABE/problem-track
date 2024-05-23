@@ -91,6 +91,11 @@ abstract class Model
         return null;
     }
 
+    public function addError(string $index, string $value)
+    {
+        $this->errors[$index] = $value;
+    }
+
     public abstract function validates(): void;
 
     /* ------------------- DATABASE METHODS ------------------- */
