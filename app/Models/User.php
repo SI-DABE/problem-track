@@ -25,7 +25,10 @@ class User extends Model
         Validations::notEmpty('email', $this);
 
         Validations::uniqueness('email', $this);
-        Validations::passwordConfirmation($this);
+
+        if ($this->newRecord()) {
+            Validations::passwordConfirmation($this);
+        }
     }
 
     public function authenticate(string $password): bool
@@ -46,8 +49,11 @@ class User extends Model
     {
         parent::__set($property, $value);
 
-        $notEmpty = $value !== null && $value !== '';
-        if ($property === 'password' && $this->newRecord() && $notEmpty) {
+        if (
+            $property === 'password' &&
+            $this->newRecord() &&
+            $value !== null && $value !== ''
+        ) {
             $this->encrypted_password = password_hash($value, PASSWORD_DEFAULT);
         }
     }
