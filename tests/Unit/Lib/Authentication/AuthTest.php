@@ -14,12 +14,12 @@ class AuthTest extends TestCase
     {
         parent::setUp();
         $_SESSION = [];
-        $this->user = new User(
-            name: 'User 1',
-            email: 'fulano@example.com',
-            password: '123456',
-            password_confirmation: '123456'
-        );
+        $this->user = new User([
+            'name' => 'User 1',
+            'email' => 'fulano@example.com',
+            'password' => '123456',
+            'password_confirmation' => '123456'
+        ]);
         $this->user->save();
     }
 
@@ -42,7 +42,7 @@ class AuthTest extends TestCase
 
         $userFromSession = Auth::user();
 
-        $this->assertEquals($this->user->getId(), $userFromSession->getId());
+        $this->assertEquals($this->user->id, $userFromSession->id);
     }
 
     public function test_check(): void

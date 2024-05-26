@@ -19,7 +19,7 @@ class Debugger
         if (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'text/html') !== false) {
             $hr = $hr ? '<hr>' : '';
 
-            return highlight_string('<?php ' . $hr . self::dump($value) . '?>', true);
+            return $hr . highlight_string('<?php ' . self::dump($value) . '?>', true);
         }
 
         return self::dump($value);

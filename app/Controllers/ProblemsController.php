@@ -3,26 +3,12 @@
 namespace App\Controllers;
 
 use App\Models\Problem;
-use App\Models\User;
+use Core\Http\Controllers\Controller;
 use Core\Http\Request;
-use Lib\Authentication\Auth;
 use Lib\FlashMessage;
 
-class ProblemsController
+class ProblemsController extends Controller
 {
-    private string $layout = 'application';
-
-    private ?User $currentUser = null;
-
-    public function currentUser(): ?User
-    {
-        if ($this->currentUser === null) {
-            $this->currentUser = Auth::user();
-        }
-
-        return $this->currentUser;
-    }
-
     public function index(Request $request): void
     {
         $paginator = Problem::paginate(page: $request->getParam('page', 1));
@@ -31,9 +17,9 @@ class ProblemsController
         $title = 'Problemas Registrados';
 
         if ($request->acceptJson()) {
-            $this->renderJson('index', compact('paginator', 'problems', 'title'));
+            $this->renderJson('problems/index', compact('paginator', 'problems', 'title'));
         } else {
-            $this->render('index', compact('paginator', 'problems', 'title'));
+            $this->render('problems/index', compact('paginator', 'problems', 'title'));
         }
     }
 
@@ -43,8 +29,8 @@ class ProblemsController
 
         $problem = Problem::findById($params['id']);
 
-        $title = "Visualização do Problema #{$problem->getId()}";
-        $this->render('show', compact('problem', 'title'));
+        $title = "Visualização do Problema #{$problem->id}";
+        $this->render('problems/show', compact('problem', 'title'));
     }
 
     public function new(): void
@@ -52,13 +38,13 @@ class ProblemsController
         $problem = new Problem();
 
         $title = 'Novo Problema';
-        $this->render('new', compact('problem', 'title'));
+        $this->render('problems/new', compact('problem', 'title'));
     }
 
     public function create(Request $request): void
     {
         $params = $request->getParams();
-        $problem = new Problem(title: $params['problem']['title']);
+        $problem = new Problem($params['problem']);
 
         if ($problem->save()) {
             FlashMessage::success('Problema registrado com sucesso!');
@@ -66,7 +52,7 @@ class ProblemsController
         } else {
             FlashMessage::danger('Existem dados incorretos! Por verifique!');
             $title = 'Novo Problema';
-            $this->render('new', compact('problem', 'title'));
+            $this->render('problems/new', compact('problem', 'title'));
         }
     }
 
@@ -75,24 +61,25 @@ class ProblemsController
         $params = $request->getParams();
         $problem = Problem::findById($params['id']);
 
-        $title = "Editar Problema #{$problem->getId()}";
-        $this->render('edit', compact('problem', 'title'));
+        $title = "Editar Problema #{$problem->id}";
+        $this->render('problems/edit', compact('problem', 'title'));
     }
 
     public function update(Request $request): void
     {
-        $params = $request->getParams();
+        $id = $request->getParam('id');
+        $params = $request->getParam('problem');
 
-        $problem = Problem::findById($params['id']);
-        $problem->setTitle($params['problem']['title']);
+        $problem = Problem::findById($id);
+        $problem->title = $params['title'];
 
         if ($problem->save()) {
             FlashMessage::success('Problema atualizado com sucesso!');
             $this->redirectTo(route('problems.index'));
         } else {
             FlashMessage::danger('Existem dados incorretos! Por verifique!');
-            $title = "Editar Problema #{$problem->getId()}";
-            $this->render('edit', compact('problem', 'title'));
+            $title = "Editar Problema #{$problem->id}";
+            $this->render('problems/edit', compact('problem', 'title'));
         }
     }
 
@@ -105,39 +92,5 @@ class ProblemsController
 
         FlashMessage::success('Problema removido com sucesso!');
         $this->redirectTo(route('problems.index'));
-    }
-
-    /**
-     * @param array<string, mixed> $data
-     */
-    private function render(string $view, array $data = []): void
-    {
-        extract($data);
-
-        $view = '/var/www/app/views/problems/' . $view . '.phtml';
-        require '/var/www/app/views/layouts/' . $this->layout . '.phtml';
-    }
-
-
-    /**
-     * @param array<string, mixed> $data
-     */
-    private function renderJson(string $view, array $data = []): void
-    {
-        extract($data);
-
-        $view = '/var/www/app/views/problems/' . $view . '.json.php';
-        $json = [];
-
-        header('Content-Type: application/json; chartset=utf-8');
-        require $view;
-        echo json_encode($json);
-        return;
-    }
-
-    private function redirectTo(string $location): void
-    {
-        header('Location: ' . $location);
-        exit;
     }
 }

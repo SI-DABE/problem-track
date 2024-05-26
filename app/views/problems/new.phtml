@@ -1,7 +1,7 @@
 <form action="<?= route('problems.create') ?>" method="POST" class="<?= $problem->hasErrors() ? '' : 'was-validated' ?>" novalidate>
     <div class="mb-3">
         <label for="problem_title" class="form-label">Título:</label>
-        <input type="text" name="problem[title]" class="form-control" id="problem_title" required>
+        <input type="text" value="<?= $problem->title ?>" name="problem[title]" class="form-control" id="problem_title" required>
         <div class="invalid-feedback"><?= $problem->errors('title') ? $problem->errors('title') : '' ?></div>
     </div>
 
