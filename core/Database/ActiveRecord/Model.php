@@ -5,8 +5,12 @@ namespace Core\Database\ActiveRecord;
 use Core\Database\Database;
 use Lib\Paginator;
 use PDO;
-use ReflectionClass;
 
+/**
+ * Class Model
+ * @package Core\Database\ActiveRecord
+ * @property int $id
+ */
 abstract class Model
 {
     /** @var array<string, string> */
@@ -64,9 +68,17 @@ abstract class Model
         throw new \Exception("Property {$property} not found in " . static::class);
     }
 
-    public function table(): string
+    public static function table(): string
     {
         return static::$table;
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public static function columns(): array
+    {
+        return static::$columns;
     }
 
     /* ------------------- VALIDATIONS METHODS ------------------- */
@@ -279,5 +291,17 @@ abstract class Model
             return $resp[0];
 
         return null;
+    }
+
+    /* ------------------- RELATIONSHIPS METHODS ------------------- */
+
+    public function belongsTo(string $related, string $foreignKey): BelongsTo
+    {
+        return new BelongsTo($this, $related, $foreignKey);
+    }
+
+    public function hasMany(string $related, string $foreignKey): HasMany
+    {
+        return new HasMany($this, $related, $foreignKey);
     }
 }

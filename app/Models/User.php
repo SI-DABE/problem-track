@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Core\Database\ActiveRecord\HasMany;
 use Lib\Validations;
 use Core\Database\ActiveRecord\Model;
 
@@ -18,6 +19,11 @@ class User extends Model
 
     protected ?string $password = null;
     protected ?string $password_confirmation = null;
+
+    public function problems(): HasMany
+    {
+        return $this->hasMany(Problem::class, 'user_id');
+    }
 
     public function validates(): void
     {

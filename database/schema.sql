@@ -1,9 +1,4 @@
-DROP TABLE IF EXISTS problems;
-
-CREATE TABLE problems (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    title VARCHAR(255) NOT NULL
-);
+SET foreign_key_checks = 0;
 
 DROP TABLE IF EXISTS users;
 
@@ -13,3 +8,13 @@ CREATE TABLE users (
     email VARCHAR(50) UNIQUE NOT NULL,
     encrypted_password VARCHAR(255) NOT NULL
 );
+
+DROP TABLE IF EXISTS problems;
+
+CREATE TABLE problems (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE
+);
+
+SET foreign_key_checks = 1;

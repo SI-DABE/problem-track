@@ -3,26 +3,40 @@
 namespace Tests\Unit\Models;
 
 use App\Models\Problem;
+use App\Models\User;
 use Tests\TestCase;
 
 class ProblemTest extends TestCase
 {
+    private Problem $problem;
+    private User $user;
+
+    public function setUp(): void
+    {
+        parent::setUp();
+        $this->user = new User([
+            'name' => 'User 1',
+            'email' => 'fulano@example.com',
+            'password' => '123456',
+            'password_confirmation' => '123456'
+        ]);
+        $this->user->save();
+
+        $this->problem = new Problem(['title' => 'Problem 1', 'user_id' => $this->user->id]);
+        $this->problem->save();
+    }
+
     public function test_should_create_new_problem(): void
     {
-        $problem = new Problem(['title' => 'Problem 1']);
-
-        $this->assertTrue($problem->save());
+        $this->assertTrue($this->problem->save());
         $this->assertCount(1, Problem::all());
     }
 
     public function test_all_should_return_all_problems(): void
     {
-        $problems[] = new Problem(['title' => 'Problem 1']);
-        $problems[] = new Problem(['title' => 'Problem 2']);
-
-        foreach ($problems as $problem) {
-            $problem->save();
-        }
+        $problems[] = $this->problem;
+        $problems[] = $this->user->problems()->new(['title' => 'Problem 2']);
+        $problems[1]->save();
 
         $all = Problem::all();
         $this->assertCount(2, $all);
@@ -31,10 +45,8 @@ class ProblemTest extends TestCase
 
     public function test_destroy_should_remove_the_problem(): void
     {
-        $problem1 = new Problem(['title' => 'Problem 1']);
-        $problem2 = new Problem(['title' => 'Problem 2']);
+        $problem2 = $this->user->problems()->new(['title' => 'Problem 2']);
 
-        $problem1->save();
         $problem2->save();
         $problem2->destroy();
 
@@ -43,13 +55,13 @@ class ProblemTest extends TestCase
 
     public function test_set_title(): void
     {
-        $problem = new Problem(['title' => 'Problem 1']);
-        $this->assertEquals('Problem 1', $problem->title);
+        $problem = $this->user->problems()->new(['title' => 'Problem 2']);
+        $this->assertEquals('Problem 2', $problem->title);
     }
 
     public function test_set_id(): void
     {
-        $problem = new Problem(['title' => 'Problem 1']);
+        $problem = $this->user->problems()->new(['title' => 'Problem 2']);
         $problem->id = 7;
 
         $this->assertEquals(7, $problem->id);
@@ -57,7 +69,7 @@ class ProblemTest extends TestCase
 
     public function test_errors_should_return_title_error(): void
     {
-        $problem = new Problem(['title' => 'Problem 1']);
+        $problem = $this->user->problems()->new(['title' => 'Problem 2']);
         $problem->title = '';
 
         $this->assertFalse($problem->isValid());
@@ -69,9 +81,9 @@ class ProblemTest extends TestCase
 
     public function test_find_by_id_should_return_the_problem(): void
     {
-        $problem2 = new Problem(['title' => 'Problem 2']);
-        $problem1 = new Problem(['title' => 'Problem 1']);
-        $problem3 = new Problem(['title' => 'Problem 3']);
+        $problem2 = $this->user->problems()->new(['title' => 'Problem 2']);
+        $problem1 = $this->user->problems()->new(['title' => 'Problem 1']);
+        $problem3 = $this->user->problems()->new(['title' => 'Problem 3']);
 
         $problem1->save();
         $problem2->save();
@@ -82,7 +94,7 @@ class ProblemTest extends TestCase
 
     public function test_find_by_id_should_return_null(): void
     {
-        $problem = new Problem(['title' => 'Problem 1']);
+        $problem = $this->user->problems()->new(['title' => 'Problem 2']);
         $problem->save();
 
         $this->assertNull(Problem::findById(7));
