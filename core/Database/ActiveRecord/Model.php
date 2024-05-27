@@ -64,8 +64,6 @@ abstract class Model
             if ($returnType !== null && in_array($returnType->getName(), $allowedTypes)) {
                 return $this->$property()->get();
             }
-            
-            return $this->$property()->get();
         }
 
         throw new \Exception("Property {$property} not found in " . static::class);
