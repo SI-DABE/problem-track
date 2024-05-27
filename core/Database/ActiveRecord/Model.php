@@ -4,7 +4,9 @@ namespace Core\Database\ActiveRecord;
 
 use Core\Database\Database;
 use Lib\Paginator;
+use Lib\StringUtils;
 use PDO;
+use ReflectionMethod;
 
 /**
  * Class Model
@@ -48,6 +50,22 @@ abstract class Model
 
         if (array_key_exists($property, $this->attributes)) {
             return $this->attributes[$property];
+        }
+
+        if (method_exists($this, $property)) { 
+            $reflectionMethod = new ReflectionMethod($this, $property);
+            $returnType = $reflectionMethod->getReturnType(); 
+
+            $allowedTypes = [
+               'Core\Database\ActiveRecord\BelongsTo',
+               'Core\Database\ActiveRecord\HasMany'
+            ];
+
+            if ($returnType !== null && in_array($returnType->getName(), $allowedTypes)) {
+                return $this->$property()->get();
+            }
+            
+            return $this->$property()->get();
         }
 
         throw new \Exception("Property {$property} not found in " . static::class);
