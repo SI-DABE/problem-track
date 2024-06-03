@@ -52,13 +52,13 @@ abstract class Model
             return $this->attributes[$property];
         }
 
-        if (method_exists($this, $property)) { 
+        if (method_exists($this, $property)) {
             $reflectionMethod = new ReflectionMethod($this, $property);
-            $returnType = $reflectionMethod->getReturnType(); 
+            $returnType = $reflectionMethod->getReturnType();
 
             $allowedTypes = [
-               'Core\Database\ActiveRecord\BelongsTo',
-               'Core\Database\ActiveRecord\HasMany'
+                'Core\Database\ActiveRecord\BelongsTo',
+                'Core\Database\ActiveRecord\HasMany'
             ];
 
             if ($returnType !== null && in_array($returnType->getName(), $allowedTypes)) {
@@ -319,5 +319,10 @@ abstract class Model
     public function hasMany(string $related, string $foreignKey): HasMany
     {
         return new HasMany($this, $related, $foreignKey);
+    }
+
+    public function BelongsToMany(string $related, string $pivot_table, string $from_foreign_key, string $to_foreign_key): BelongsToMany
+    {
+        return new BelongsToMany($this, $related, $pivot_table, $from_foreign_key, $to_foreign_key);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Core\Database\ActiveRecord\BelongsToMany;
 use Core\Database\ActiveRecord\HasMany;
 use Lib\Validations;
 use Core\Database\ActiveRecord\Model;
@@ -23,6 +24,11 @@ class User extends Model
     public function problems(): HasMany
     {
         return $this->hasMany(Problem::class, 'user_id');
+    }
+
+    public function problemsReinforced(): BelongsToMany
+    {
+        return $this->belongsToMany(Problem::class, 'problem_user_reinforce', 'user_id', 'problem_id');
     }
 
     public function validates(): void
