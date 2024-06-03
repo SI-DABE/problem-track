@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Core\Database\ActiveRecord\BelongsTo;
 use Lib\Validations;
 use Core\Database\ActiveRecord\Model;
 
@@ -12,7 +13,12 @@ use Core\Database\ActiveRecord\Model;
 class Problem extends Model
 {
     protected static string $table = 'problems';
-    protected static array $columns = ['title'];
+    protected static array $columns = ['title', 'user_id'];
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 
     public function validates(): void
     {

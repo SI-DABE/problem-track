@@ -8,5 +8,5 @@ use Database\Populate\UsersPopulate;
 
 Database::migrate();
 
-ProblemsPopulate::populate();
 UsersPopulate::populate();
+ProblemsPopulate::populate();

@@ -10,15 +10,20 @@ class Controller
 {
     protected string $layout = 'application';
 
-    private ?User $currentUser = null;
+    protected ?User $current_user = null;
+
+    public function __construct()
+    {
+        $this->current_user = Auth::user();
+    }
 
     public function currentUser(): ?User
     {
-        if ($this->currentUser === null) {
-            $this->currentUser = Auth::user();
+        if ($this->current_user === null) {
+            $this->current_user = Auth::user();
         }
 
-        return $this->currentUser;
+        return $this->current_user;
     }
 
     /**

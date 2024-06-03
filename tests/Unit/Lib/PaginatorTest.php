@@ -3,6 +3,7 @@
 namespace Tests\Unit\Lib;
 
 use App\Models\Problem;
+use App\Models\User;
 use Lib\Paginator;
 use Tests\TestCase;
 
@@ -15,8 +16,16 @@ class PaginatorTest extends TestCase
     public function setUp(): void
     {
         parent::setUp();
+        $user = new User([
+            'name' => 'User 1',
+            'email' => 'fulano@example.com',
+            'password' => '123456',
+            'password_confirmation' => '123456'
+        ]);
+        $user->save();
+
         for ($i = 0; $i < 10; $i++) {
-            $problem = new Problem(['title' => "Problem $i"]);
+            $problem = new Problem(['title' => "Problem $i", 'user_id' => $user->id]);
             $problem->save();
             $this->problems[] = $problem;
         }
@@ -35,7 +44,7 @@ class PaginatorTest extends TestCase
 
     public function test_total_of_pages_when_the_division_is_not_exact(): void
     {
-        $problem = new Problem(['title' => 'Problem 11']);
+        $problem = new Problem(['title' => 'Problem 11', 'user_id' => $this->problems[0]->user_id]);
         $problem->save();
         $this->paginator = new Paginator(Problem::class, 1, 5, 'problems', ['title']);
 
@@ -84,7 +93,7 @@ class PaginatorTest extends TestCase
     {
         $this->assertCount(5, $this->paginator->registers());
 
-        $paginator = new Paginator(Problem::class, 1, 10, 'problems', ['title']);
+        $paginator = new Paginator(Problem::class, 1, 10, 'problems', ['title', 'user_id']);
         $this->assertEquals($this->problems, $paginator->registers());
     }
 }

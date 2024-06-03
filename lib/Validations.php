@@ -32,7 +32,7 @@ class Validations
             $fields = [$fields];
         }
 
-        $table = $object->table();
+        $table = $object::table();
         $conditions = implode(' AND ', array_map(fn ($field) => "{$field} = :{$field}", $fields));
 
         $sql = <<<SQL
