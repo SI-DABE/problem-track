@@ -17,4 +17,12 @@ CREATE TABLE problems (
     user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE
 );
 
+DROP TABLE IF EXISTS problem_user_reinforce;
+
+CREATE TABLE problem_user_reinforce (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+    problem_id INT NOT NULL REFERENCES users(id) ON DELETE RESTRICT
+);
+
 SET foreign_key_checks = 1;

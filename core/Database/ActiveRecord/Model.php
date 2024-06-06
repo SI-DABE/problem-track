@@ -52,17 +52,19 @@ abstract class Model
             return $this->attributes[$property];
         }
 
-        if (method_exists($this, $property)) { 
-            $reflectionMethod = new ReflectionMethod($this, $property);
-            $returnType = $reflectionMethod->getReturnType(); 
+        $method = StringUtils::lowerSnakeToCamelCase($property);
+        if (method_exists($this, $method)) {
+            $reflectionMethod = new ReflectionMethod($this, $method);
+            $returnType = $reflectionMethod->getReturnType();
 
             $allowedTypes = [
-               'Core\Database\ActiveRecord\BelongsTo',
-               'Core\Database\ActiveRecord\HasMany'
+                'Core\Database\ActiveRecord\BelongsTo',
+                'Core\Database\ActiveRecord\HasMany',
+                'Core\Database\ActiveRecord\BelongsToMany'
             ];
 
             if ($returnType !== null && in_array($returnType->getName(), $allowedTypes)) {
-                return $this->$property()->get();
+                return $this->$method()->get();
             }
         }
 
@@ -117,7 +119,7 @@ abstract class Model
         return empty($this->errors);
     }
 
-    public function errors(string $index): string | null
+    public function errors(string $index = null): string | null
     {
         if (isset($this->errors[$index])) {
             return $this->errors[$index];
@@ -250,14 +252,15 @@ abstract class Model
         return $models;
     }
 
-    public static function paginate(int $page = 1, int $per_page = 10): Paginator
+    public static function paginate(int $page = 1, int $per_page = 10, string $route = null): Paginator
     {
         return new Paginator(
             class: static::class,
             page: $page,
             per_page: $per_page,
             table: static::$table,
-            attributes: static::$columns
+            attributes: static::$columns,
+            route: $route
         );
     }
 
@@ -309,6 +312,15 @@ abstract class Model
         return null;
     }
 
+    /**
+     * @param array<string, mixed> $conditions
+     */
+    public static function exists($conditions): bool
+    {
+        $resp = self::where($conditions);
+        return !empty($resp);
+    }
+
     /* ------------------- RELATIONSHIPS METHODS ------------------- */
 
     public function belongsTo(string $related, string $foreignKey): BelongsTo
@@ -319,5 +331,10 @@ abstract class Model
     public function hasMany(string $related, string $foreignKey): HasMany
     {
         return new HasMany($this, $related, $foreignKey);
+    }
+
+    public function BelongsToMany(string $related, string $pivot_table, string $from_foreign_key, string $to_foreign_key): BelongsToMany
+    {
+        return new BelongsToMany($this, $related, $pivot_table, $from_foreign_key, $to_foreign_key);
     }
 }

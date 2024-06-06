@@ -59,4 +59,10 @@ class Controller
         header('Location: ' . $location);
         exit;
     }
+
+    protected function redirectBack(): void
+    {
+        $referer = $_SERVER['HTTP_REFERER'] ?? '/';
+        $this->redirectTo($referer);
+    }
 }

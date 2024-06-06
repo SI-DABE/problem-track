@@ -2,6 +2,7 @@
 
 use App\Controllers\AuthenticationsController;
 use App\Controllers\ProblemsController;
+use App\Controllers\ReinforceProblemsController;
 use Core\Router\Route;
 
 // Authentication
@@ -29,4 +30,21 @@ Route::middleware('auth')->group(function () {
 
     // Logout
     Route::get('/logout', [AuthenticationsController::class, 'destroy'])->name('users.logout');
+
+
+    // Reinforce Problems
+    Route::get('/reinforce/problems', [ReinforceProblemsController::class, 'index'])
+        ->name('reinforce.problems');
+    Route::get('/reinforce/problems/page/{page}', [ReinforceProblemsController::class, 'index'])
+        ->name('reinforce.problems.paginate');
+
+    Route::get('/reinforce/problems/supported', [ReinforceProblemsController::class, 'supported'])
+        ->name('reinforce.problems.supported');
+
+    Route::post('/reinforce/problems/{id}', [ReinforceProblemsController::class, 'support'])
+        ->name('reinforce.problems.create');
+    Route::post(
+        '/reinforce/problems/{id}/stopped-supporting',
+        [ReinforceProblemsController::class, 'stoppedSupporting']
+    )->name('reinforce.problems.stopped-supporting');
 });
