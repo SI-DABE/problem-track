@@ -1,0 +1,49 @@
+<div class="row">
+    <div class="col-6 mb-3">
+        <div class="input-group">
+            <input type="text" class="form-control" placeholder="Procurar problemas" aria-label="Recipient's username" aria-describedby="button-addon2">
+            <button class="btn btn-outline-primary" type="button">
+                Pesquisar...
+            </button>
+        </div>
+    </div>
+</div>
+
+<table class="table">
+    <thead>
+        <th>ID</th>
+        <th>Título</th>
+        <th>Registrado por</th>
+        <th>Apoios</th>
+    </thead>
+    <tbody>
+        <?php foreach ($problems as $problem) : ?>
+            <tr>
+                <td>#<?= $problem->id ?></td>
+                <td><?= $problem->title ?></td>
+                <td><?= $problem->user->name ?></td>
+                <td>
+                    <div class="d-flex flex-row">
+                        <?php if ($problem->isSupportedByUser($this->current_user)) : ?>
+                            <form action="<?= route('reinforce.problems.stopped-supporting', ['id' => $problem->id]) ?>" method="POST" class="m-0">
+                                <button class="btn btn-outline-danger">
+                                    <i class="fas fa-thumbs-down"></i> Desapoiar
+                                </button>
+                            </form>
+                        <?php else : ?>
+                            <form action="<?= route('reinforce.problems.create', ['id' => $problem->id]) ?>" method="POST" class="m-0">
+                                <button class="btn btn-outline-primary">
+                                    <i class="fas fa-thumbs-up"></i> Apoiar
+                                </button>
+                            </form>
+                        <?php endif; ?>
+
+                        <span class="mx-3 m-auto"><?= $problem->reinforcedByUsers()->count() ?> Apoiadores</span>
+                    </div>
+                </td>
+            </tr>
+        <?php endforeach; ?>
+    </tbody>
+</table>
+
+<?php $paginator->renderPagesNavigation(); ?>

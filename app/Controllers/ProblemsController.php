@@ -12,14 +12,6 @@ class ProblemsController extends Controller
 {
     public function index(Request $request): void
     {
-
-        // $reinforce = new ProblemUserReinforce([
-        //     'problem_id' => 2,
-        //     'user_id' => 2
-        // ]);
-        // $reinforce->save();
-        dd($this->current_user->problemsReinforced()->count());
-
         $paginator = $this->current_user->problems()->paginate(page: $request->getParam('page', 1));
         $problems = $paginator->registers();
 

@@ -16,14 +16,29 @@ class BelongsToMany
     ) {
     }
 
+    /**
+     * @return array<Model>
+     */
     public function get()
     {
+        $fromTable = $this->model::table();
+        $toTable = $this->related::table();
+
+        $attributes = $toTable . '.id, ';
+        foreach ($this->related::columns() as $column) {
+            $attributes .= $toTable . '.' . $column . ', ';
+        }
+        $attributes = rtrim($attributes, ', ');
+
         $sql = <<<SQL
-            SELECT problems.id, problems.title 
-            FROM problems, users, {$this->pivot_table}
-            WHERE problems.id = {$this->pivot_table}.{$this->to_foreign_key} and
-                    users.id = {$this->pivot_table}.{$this->from_foreign_key} and
-                    users.id = {$this->model->id}
+            SELECT 
+                {$attributes}
+            FROM 
+                {$fromTable}, {$toTable}, {$this->pivot_table}
+            WHERE 
+                {$toTable}.id = {$this->pivot_table}.{$this->to_foreign_key} AND
+                {$fromTable}.id = {$this->pivot_table}.{$this->from_foreign_key} AND
+                {$fromTable}.id = {$this->model->id}
         SQL;
 
         $pdo = Database::getDatabaseConn();
@@ -31,17 +46,28 @@ class BelongsToMany
         $stmt->execute();
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        dd($rows);
+        $models = [];
+        foreach ($rows as $row) {
+            $models[] = new $this->related($row);
+        }
+
+        return $models;
     }
 
-    public function count()
+    public function count(): int
     {
+        $fromTable = $this->model::table();
+        $toTable = $this->related::table();
+
         $sql = <<<SQL
-            SELECT count(problems.id) as total
-            FROM problems, users, {$this->pivot_table}
-            WHERE problems.id = {$this->pivot_table}.{$this->to_foreign_key} and
-                    users.id = {$this->pivot_table}.{$this->from_foreign_key} and
-                    users.id = {$this->model->id}
+        SELECT 
+            count({$toTable}.id) as total
+        FROM 
+            {$fromTable}, {$toTable}, {$this->pivot_table}
+        WHERE 
+            {$toTable}.id = {$this->pivot_table}.{$this->to_foreign_key} AND
+            {$fromTable}.id = {$this->pivot_table}.{$this->from_foreign_key} AND
+            {$fromTable}.id = {$this->model->id}
         SQL;
 
         $pdo = Database::getDatabaseConn();

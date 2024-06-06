@@ -52,17 +52,19 @@ abstract class Model
             return $this->attributes[$property];
         }
 
-        if (method_exists($this, $property)) {
-            $reflectionMethod = new ReflectionMethod($this, $property);
+        $method = StringUtils::lowerSnakeToCamelCase($property);
+        if (method_exists($this, $method)) {
+            $reflectionMethod = new ReflectionMethod($this, $method);
             $returnType = $reflectionMethod->getReturnType();
 
             $allowedTypes = [
                 'Core\Database\ActiveRecord\BelongsTo',
-                'Core\Database\ActiveRecord\HasMany'
+                'Core\Database\ActiveRecord\HasMany',
+                'Core\Database\ActiveRecord\BelongsToMany'
             ];
 
             if ($returnType !== null && in_array($returnType->getName(), $allowedTypes)) {
-                return $this->$property()->get();
+                return $this->$method()->get();
             }
         }
 
@@ -117,7 +119,7 @@ abstract class Model
         return empty($this->errors);
     }
 
-    public function errors(string $index): string | null
+    public function errors(string $index = null): string | null
     {
         if (isset($this->errors[$index])) {
             return $this->errors[$index];
@@ -307,6 +309,15 @@ abstract class Model
             return $resp[0];
 
         return null;
+    }
+
+    /**
+     * @param array<string, mixed> $conditions
+     */
+    public static function exists($conditions): bool
+    {
+        $resp = self::where($conditions);
+        return !empty($resp);
     }
 
     /* ------------------- RELATIONSHIPS METHODS ------------------- */

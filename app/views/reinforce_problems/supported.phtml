@@ -1,0 +1,16 @@
+<table class="table">
+    <thead>
+        <th>ID</th>
+        <th>Título</th>
+        <th>Registrado por</th>
+    </thead>
+    <tbody>
+        <?php foreach ($problems as $problem) : ?>
+            <tr>
+                <td>#<?= $problem->id ?></td>
+                <td><?= $problem->title ?></td>
+                <td><?= $problem->user->name ?></td>
+            </tr>
+        <?php endforeach; ?>
+    </tbody>
+</table>
