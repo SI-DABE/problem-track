@@ -2,6 +2,7 @@
 
 use App\Controllers\AuthenticationsController;
 use App\Controllers\ProblemsController;
+use App\Controllers\ProfileController;
 use App\Controllers\ReinforceProblemsController;
 use Core\Router\Route;
 
@@ -30,6 +31,10 @@ Route::middleware('auth')->group(function () {
 
     // Logout
     Route::get('/logout', [AuthenticationsController::class, 'destroy'])->name('users.logout');
+
+    // Profile
+    Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
+    Route::post('/profile/avatar', [ProfileController::class, 'updateAvatar'])->name('profile.avatar');
 
 
     // Reinforce Problems
