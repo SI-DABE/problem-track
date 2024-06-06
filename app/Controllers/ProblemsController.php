@@ -2,8 +2,6 @@
 
 namespace App\Controllers;
 
-use App\Models\Problem;
-use App\Models\ProblemUserReinforce;
 use Core\Http\Controllers\Controller;
 use Core\Http\Request;
 use Lib\FlashMessage;

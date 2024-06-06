@@ -35,6 +35,9 @@ Route::middleware('auth')->group(function () {
     // Reinforce Problems
     Route::get('/reinforce/problems', [ReinforceProblemsController::class, 'index'])
         ->name('reinforce.problems');
+    Route::get('/reinforce/problems/page/{page}', [ReinforceProblemsController::class, 'index'])
+        ->name('reinforce.problems.paginate');
+
     Route::get('/reinforce/problems/supported', [ReinforceProblemsController::class, 'supported'])
         ->name('reinforce.problems.supported');
 

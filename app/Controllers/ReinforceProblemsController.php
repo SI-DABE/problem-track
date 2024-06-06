@@ -12,7 +12,7 @@ class ReinforceProblemsController extends Controller
 {
     public function index(Request $request): void
     {
-        $paginator = Problem::paginate(page: $request->getParam('page', 1));
+        $paginator = Problem::paginate(page: $request->getParam('page', 1), route: 'reinforce.problems.paginate');
         $problems = $paginator->registers();
 
         $title = 'Todos Problemas';
