@@ -43,7 +43,7 @@ class ReinforceProblemsController extends Controller
             FlashMessage::danger('Erro ao suportar problema: ' . $message);
         }
 
-        $this->redirectTo(route('reinforce.problems'));
+        $this->redirectBack();
     }
 
     public function stoppedSupporting(Request $request): void
@@ -61,6 +61,6 @@ class ReinforceProblemsController extends Controller
             FlashMessage::success('Você parou de suportar o problema.');
         }
 
-        $this->redirectTo(route('reinforce.problems'));
+        $this->redirectBack();
     }
 }
