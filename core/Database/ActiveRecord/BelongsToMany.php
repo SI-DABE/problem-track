@@ -38,11 +38,13 @@ class BelongsToMany
             WHERE 
                 {$toTable}.id = {$this->pivot_table}.{$this->to_foreign_key} AND
                 {$fromTable}.id = {$this->pivot_table}.{$this->from_foreign_key} AND
-                {$fromTable}.id = {$this->model->id}
+                {$fromTable}.id = :id
         SQL;
 
         $pdo = Database::getDatabaseConn();
         $stmt = $pdo->prepare($sql);
+
+        $stmt->bindValue(':id', $this->model->id);
         $stmt->execute();
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -67,11 +69,12 @@ class BelongsToMany
         WHERE 
             {$toTable}.id = {$this->pivot_table}.{$this->to_foreign_key} AND
             {$fromTable}.id = {$this->pivot_table}.{$this->from_foreign_key} AND
-            {$fromTable}.id = {$this->model->id}
+            {$fromTable}.id = :id
         SQL;
 
         $pdo = Database::getDatabaseConn();
         $stmt = $pdo->prepare($sql);
+        $stmt->bindValue(':id', $this->model->id);
         $stmt->execute();
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
