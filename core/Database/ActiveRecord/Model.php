@@ -183,6 +183,34 @@ abstract class Model
         return false;
     }
 
+    /**
+     * @param array<string, mixed> $data
+     */
+    public function update(array $data): bool
+    {
+        $table = static::$table;
+
+        $sets = array_map(function ($column) {
+            return "{$column} = :{$column}";
+        }, array_keys($data));
+        $sets = implode(', ', $sets);
+
+        $sql = <<<SQL
+            UPDATE {$table} set {$sets} WHERE id = :id;
+        SQL;
+
+        $pdo = Database::getDatabaseConn();
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindValue(':id', $this->id);
+
+        foreach ($data as $column => $value) {
+            $stmt->bindValue($column, $value);
+        }
+
+        $stmt->execute();
+        return ($stmt->rowCount() !== 0);
+    }
+
     public function destroy(): bool
     {
         $table = static::$table;

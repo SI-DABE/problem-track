@@ -52,6 +52,11 @@ $ ./run db:reset
 $ ./run db:populate
 ```
 
+### Fixed uploads folder permission
+
+```
+sudo chown www-data:www-data public/assets/uploads
+```
 
 #### Run the tests
 
