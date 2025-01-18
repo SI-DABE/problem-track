@@ -51,4 +51,9 @@ class Database
         $sql = file_get_contents(Constants::databasePath()->join('schema.sql'));
         self::getDatabaseConn()->exec($sql);
     }
+
+    public static function exec(string $sql): void
+    {
+        self::getDatabaseConn()->exec($sql);
+    }
 }

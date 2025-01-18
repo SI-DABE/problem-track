@@ -28,12 +28,32 @@ class Validations
 
     public static function uniqueness($fields, $object)
     {
+        $dbFieldsValues = [];
+        $objFieldValues = [];
+
         if (!is_array($fields)) {
             $fields = [$fields];
         }
 
+        if (!$object->newRecord()) {
+            $dbObject = $object::findById($object->id);
+
+            foreach ($fields as $field) {
+                $dbFieldsValues[] = $dbObject->$field;
+                $objFieldValues[] = $object->$field;
+            }
+
+            if (
+                !empty($dbFieldsValues) &&
+                !empty($objFieldValues) &&
+                $dbFieldsValues === $objFieldValues
+            ) {
+                return true;
+            }
+        }
+
         $table = $object::table();
-        $conditions = implode(' AND ', array_map(fn ($field) => "{$field} = :{$field}", $fields));
+        $conditions = implode(' AND ', array_map(fn($field) => "{$field} = :{$field}", $fields));
 
         $sql = <<<SQL
             SELECT id FROM {$table} WHERE {$conditions};
