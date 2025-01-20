@@ -88,6 +88,16 @@ Access [localhost](http://localhost)
 
 ### Teste de API
 
+#### Rota não autenticada
+
 ```shell
 curl -H "Accept: application/json" localhost/problems
+```
+
+#### Rota autenticada
+
+Neste caso precisa alterar o valor do PHPSESSID de acordo com a o id da sua sessão.
+
+```shell
+curl -H "Accept: application/json" -b "PHPSESSID=5f55f364a48d87fb7ef9f18425a8ae88" localhost/problems
 ```

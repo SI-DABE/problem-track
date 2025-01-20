@@ -133,7 +133,7 @@ abstract class Model
         $this->errors[$index] = $value;
     }
 
-    public abstract function validates(): void;
+    public function validates(): void {}
 
     /* ------------------- DATABASE METHODS ------------------- */
     public function save(): bool

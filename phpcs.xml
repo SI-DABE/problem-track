@@ -21,4 +21,11 @@
     <rule ref="PSR1.Methods.CamelCapsMethodName.NotCamelCaps">
         <exclude-pattern>*Test.php</exclude-pattern>
     </rule>
+
+    <!-- Allow lines up to 120 characters -->
+    <rule ref="Generic.Files.LineLength">
+        <properties>
+            <property name="lineLimit" value="130"/>
+        </properties>
+    </rule>
 </ruleset>

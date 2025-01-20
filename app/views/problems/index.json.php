@@ -3,7 +3,7 @@
 $problemsToJson = [];
 
 foreach ($problems as $problem) {
-    $problemsToJson[] = ['id' => $problem->getId(), 'title' => $problem->getTitle()];
+    $problemsToJson[] = ['id' => $problem->id, 'title' => $problem->title];
 }
 
 $json['problems'] = $problemsToJson;

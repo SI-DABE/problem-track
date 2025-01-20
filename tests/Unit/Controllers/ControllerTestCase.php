@@ -26,9 +26,37 @@ abstract class ControllerTestCase extends TestCase
         unset($_SERVER['REQUEST_URI']);
     }
 
-    public function get(string $action, string $controller): string
+    /**
+     * @param array<string, mixed> $params
+     */
+    public function get(string $action, string $controllerName, array $params = []): string
     {
-        $controller = new $controller();
+        return $this->execController($action, $controllerName, $params);
+    }
+
+    /**
+     * @param array<string, mixed> $params
+     */
+    public function post(string $action, string $controllerName, array $params = []): string
+    {
+        return $this->execController($action, $controllerName, $params);
+    }
+
+    /**
+     * @param array<string, mixed> $params
+     */
+    public function put(string $action, string $controllerName, array $params = []): string
+    {
+        return $this->execController($action, $controllerName, $params);
+    }
+
+    /**
+     * @param array<string, mixed> $params
+     */
+    private function execController(string $action, string $controllerName, array $params = []): string
+    {
+        $controller = $this->getControllerInstance($controllerName);
+        $this->request->addParams($params);
 
         ob_start();
         try {
@@ -39,5 +67,25 @@ abstract class ControllerTestCase extends TestCase
         } finally {
             ob_end_clean();
         }
+    }
+
+
+    private function getControllerInstance(string $controllerName) // @phpstan-ignore-line
+    {
+        if (!class_exists('\OverriddenController')) {
+            // This is necessary to override redirectTo, because the redirectTo
+            // method from the Controller call the exit and stop the test execution
+            $code = "
+            class OverriddenController extends $controllerName {
+                protected function redirectTo(string \$location): void {
+                    echo 'Location: ' . \$location;
+                }
+            }
+            ";
+
+            eval($code);
+        }
+
+        return new \OverriddenController(); // @phpstan-ignore-line
     }
 }
