@@ -6,12 +6,12 @@ use Core\Constants\Constants;
 
 class EnvLoader
 {
-    public static function init(): void
+    public static function init(string $env = '.env'): void
     {
-        $envs = parse_ini_file(Constants::rootPath()->join('.env'));
+        $envs = parse_ini_file(Constants::rootPath()->join($env));
 
         foreach ($envs as $key => $value) {
-            $_ENV[$key] = $value;
+            $_ENV[$key] = env($key) ?? $value;
         }
     }
 }

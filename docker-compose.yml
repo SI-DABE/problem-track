@@ -36,6 +36,42 @@ services:
     networks:
       - app-network
 
+  selenium:
+    image: selenium/standalone-chrome-debug:latest
+    container_name: selenium
+    ports:
+      - 4444:4444
+      - 5900:5900
+    networks:
+      - app-network
+    volumes:
+      - ./tests/Browser/screenshots:/screenshots
+
+  web_test:
+    image: nginx:latest
+    working_dir: /var/www
+    volumes:
+      - .:/var/www
+      - ./server/test.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - app-network
+    ports:
+      - 8080:80
+
+  php_test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    working_dir: /var/www
+    volumes:
+      - .:/var/www
+    networks:
+      - app-network
+    depends_on:
+      - db
+    env_file:
+      - .env.testing
+
 networks:
   app-network:
     driver: bridge
