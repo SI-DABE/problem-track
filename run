@@ -45,6 +45,15 @@ function test {
    docker compose run --rm php ./vendor/bin/phpunit --color ${TEST_PATH}
 }
 
+function codecept {
+   docker compose run --rm php_test ./vendor/bin/codecept ${@}
+}
+
+function test:browser {
+   TEST_PATH="${@:-tests/Acceptance}"
+   docker compose run --rm php_test ./vendor/bin/codecept run acceptance ${TEST_PATH}
+}
+
 function phpcs {
    TEST_PATH="${@:-.}"
    docker compose run --rm php ./vendor/bin/phpcs ${TEST_PATH}
@@ -57,9 +66,9 @@ function phpcbf {
 
 function phpstan {
    TEST_PATH="${@:-}"
-   docker compose run --rm php ./vendor/bin/phpstan ${TEST_PATH}
+   docker compose run --rm php ./vendor/bin/phpstan analyse --memory-limit 1G ${TEST_PATH}
 }
-
+ 
 function git:clean:branchs {
   git branch | grep -v '\*\|master\|main\|develop\|production' | xargs -n 1 git branch -D
 }

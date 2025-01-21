@@ -22,10 +22,15 @@
         <exclude-pattern>*Test.php</exclude-pattern>
     </rule>
 
-    <!-- Allow lines up to 120 characters -->
+    <!-- Allow lines up to 130 characters -->
     <rule ref="Generic.Files.LineLength">
         <properties>
             <property name="lineLimit" value="130"/>
         </properties>
+    </rule>
+
+    <!-- Allow use _ in name method in classes that end with "Cest" -->
+    <rule ref="PSR2.Methods.MethodDeclaration.Underscore">
+        <exclude-pattern>*Cest.php</exclude-pattern>
     </rule>
 </ruleset>
