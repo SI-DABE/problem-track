@@ -11,7 +11,7 @@ class EnvLoader
         $envs = parse_ini_file(Constants::rootPath()->join('.env'));
 
         foreach ($envs as $key => $value) {
-            $_ENV[$key] = $value;
+            $_ENV[$key] = getenv($key) !== false ? getenv($key) : $value;
         }
     }
 }

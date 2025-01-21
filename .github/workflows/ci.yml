@@ -1,8 +1,9 @@
 name: Continous Integration
 
 on:
-  pull_request:
-    types: [opened, synchronize, reopened]
+  push:
+  # pull_request:
+  #   types: [opened, synchronize, reopened]
 
 jobs:
   tests:
@@ -23,10 +24,35 @@ jobs:
       - name: PHPUnit Units test
         run: ./run test tests/Unit
 
-      - name: PHPUnit Browser tests
-        run: |
-          ./run up -d
-          ./run test tests/Browser
+  acceptance_tests:
+    name: Acceptance Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Create .env
+        run: cp .env.example .env
+
+      - name: Composer install
+        run: ./run composer install
+
+      - name: Generate Codeception files
+        run: ./run codecept build
+
+      - name: Up containers
+        run: ./run up -d
+
+      - name: See containers
+        run: ./run ps
+
+      - name: Check Selenium Logs
+        run: docker logs $(docker ps -q --filter "ancestor=selenium/standalone-chrome-debug")
+
+      - name: PHPUnit Acceptance test
+        run: ./run test:browser
 
   code_quality:
     name: Code Quality Check
@@ -45,6 +71,9 @@ jobs:
 
       - name: PSR-4 Checker
         run: ./run composer dump-autoload --optimize --strict-psr
+
+      - name: Generate Codeception files
+        run: ./run codecept build
 
       - name: PHPCS
         run: ./run phpcs
