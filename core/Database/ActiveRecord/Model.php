@@ -116,7 +116,7 @@ abstract class Model
 
     public function hasErrors(): bool
     {
-        return empty($this->errors);
+        return !empty($this->errors);
     }
 
     public function errors(string $index = null): string | null

@@ -1,4 +1,4 @@
-<form action="<?= route('problems.update', ['id' => $problem->id]) ?>" method="POST" class="<?= $problem->hasErrors() ? '' : 'was-validated' ?>" novalidate>
+<form action="<?= route('problems.update', ['id' => $problem->id]) ?>" method="POST" class="<?= $problem->hasErrors() ? 'was-validated' : '' ?>" novalidate>
     <input type="hidden" name="_method" value="PUT">
     <div class="mb-3">
         <label for="problem_title" class="form-label">Título:</label>

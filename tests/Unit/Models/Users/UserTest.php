@@ -43,7 +43,7 @@ class UserTest extends TestCase
         $users[] = $this->user->id;
         $users[] = $this->user2->id;
 
-        $all = array_map(fn ($user) => $user->id, User::all());
+        $all = array_map(fn($user) => $user->id, User::all());
 
         $this->assertCount(2, $all);
         $this->assertEquals($users, $all);
@@ -79,7 +79,7 @@ class UserTest extends TestCase
 
         $this->assertFalse($user->isValid());
         $this->assertFalse($user->save());
-        $this->assertFalse($user->hasErrors());
+        $this->assertTrue($user->hasErrors());
 
         $this->assertEquals('não pode ser vazio!', $user->errors('name'));
         $this->assertEquals('não pode ser vazio!', $user->errors('email'));
