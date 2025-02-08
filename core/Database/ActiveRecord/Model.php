@@ -205,6 +205,7 @@ abstract class Model
 
         foreach ($data as $column => $value) {
             $stmt->bindValue($column, $value);
+            $this->$column = $value;
         }
 
         $stmt->execute();

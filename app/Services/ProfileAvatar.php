@@ -12,8 +12,10 @@ class ProfileAvatar
     /** @var array<string, mixed> $image */
     private array $image;
 
+    /** @param array<string, mixed> $validations */
     public function __construct(
-        private Model $model
+        private Model $model,
+        private array $validations = []
     ) {
     }
 
@@ -22,6 +24,7 @@ class ProfileAvatar
         if ($this->model->avatar_name) {
             // Generate MD5 hash of the avatar file to use as cache buster in URL
             $hash = md5_file($this->getAbsoluteSavedFilePath());
+
             // Return the avatar URL with hash parameter to force browser to reload when file changes
             return $this->baseDir() . $this->model->avatar_name . '?' . $hash;
         }
@@ -32,29 +35,46 @@ class ProfileAvatar
     /**
      * @param array<string, mixed> $image
      */
-    public function update(array $image): void
+    public function update(array $image): bool
     {
         $this->image = $image;
 
-        if (!empty($this->getTmpFilePath())) {
-            $pdo = Database::getDatabaseConn();
-            $pdo->beginTransaction();
-
-            try {
-                $this->removeOldImage();
-
-                if (!move_uploaded_file($this->getTmpFilePath(), $this->getAbsoluteDestinationPath())) {
-                    throw new \RuntimeException('Failed to move uploaded file');
-                }
-
-                $this->model->update(['avatar_name' => $this->getFileName()]);
-
-                $pdo->commit();
-            } catch (\Exception $e) {
-                $pdo->rollBack();
-                throw $e;
-            }
+        if (!$this->isValidImage()) {
+            return false;
         }
+
+        if ($this->updateFile()) {
+            $this->model->update([
+                'avatar_name' => $this->getFileName(),
+            ]);
+
+            return true;
+        }
+
+        return false;
+    }
+
+    protected function updateFile(): bool
+    {
+        if (empty($this->getTmpFilePath())) {
+            return false;
+        }
+
+        $this->removeOldImage();
+
+        $resp = move_uploaded_file(
+            $this->getTmpFilePath(),
+            $this->getAbsoluteDestinationPath()
+        );
+
+        if (!$resp) {
+            $error = error_get_last();
+            throw new \RuntimeException(
+                'Failed to move uploaded file: ' . ($error['message'] ?? 'Unknown error')
+            );
+        }
+
+        return true;
     }
 
     private function getTmpFilePath(): string
@@ -65,7 +85,6 @@ class ProfileAvatar
     private function removeOldImage(): void
     {
         if ($this->model->avatar_name) {
-            $path = Constants::rootPath()->join('public' . $this->baseDir())->join($this->model->avatar_name);
             unlink($this->getAbsoluteSavedFilePath());
         }
     }
@@ -100,5 +119,35 @@ class ProfileAvatar
     private function getAbsoluteSavedFilePath(): string
     {
         return Constants::rootPath()->join('public' . $this->baseDir())->join($this->model->avatar_name);
+    }
+
+    private function isValidImage(): bool
+    {
+        if (isset($this->validations['extension'])) {
+            $this->validateImageExtension();
+        }
+
+        if (isset($this->validations['size'])) {
+            $this->validateImageSize();
+        }
+
+        return $this->model->errors('avatar') === null;
+    }
+
+    private function validateImageExtension(): void
+    {
+        $file_name_splitted  = explode('.', $this->image['name']);
+        $file_extension = end($file_name_splitted);
+
+        if (!in_array($file_extension, $this->validations['extension'])) {
+            $this->model->addError('avatar', 'Extensão de arquivo inválida');
+        }
+    }
+
+    private function validateImageSize(): void
+    {
+        if ($this->image['size'] > $this->validations['size']) {
+            $this->model->addError('avatar', 'Tamanho do arquivo inválido');
+        }
     }
 }

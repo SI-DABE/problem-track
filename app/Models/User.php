@@ -13,6 +13,7 @@ use Core\Database\ActiveRecord\Model;
  * @property string $name
  * @property string $email
  * @property string $encrypted_password
+ * @property string $avatar_name
  * @property Problem[] $problems
  * @property Problem[] $reinforced_problems
  */
