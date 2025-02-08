@@ -74,7 +74,7 @@ class ProblemTest extends TestCase
 
         $this->assertFalse($problem->isValid());
         $this->assertFalse($problem->save());
-        $this->assertFalse($problem->hasErrors());
+        $this->assertTrue($problem->hasErrors());
 
         $this->assertEquals('não pode ser vazio!', $problem->errors('title'));
     }

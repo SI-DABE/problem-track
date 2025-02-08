@@ -5,6 +5,7 @@ namespace Tests\Unit\Controllers;
 use Core\Constants\Constants;
 use Core\Http\Request;
 use Tests\TestCase;
+use ReflectionClass;
 
 abstract class ControllerTestCase extends TestCase
 {
@@ -69,23 +70,28 @@ abstract class ControllerTestCase extends TestCase
         }
     }
 
-
-    private function getControllerInstance(string $controllerName) // @phpstan-ignore-line
+    /**
+     * Creates a test controller instance with overridden redirect behavior
+     * @template T of \Core\Http\Controllers\Controller
+     * @param class-string<T> $controllerName
+     * @return \Core\Http\Controllers\Controller
+     */
+    private function getControllerInstance(string $controllerName)
     {
-        if (!class_exists('\OverriddenController')) {
-            // This is necessary to override redirectTo, because the redirectTo
-            // method from the Controller call the exit and stop the test execution
-            $code = "
-            class OverriddenController extends $controllerName {
+        // Generate a unique class name by appending a random hash to avoid naming conflicts
+        // when creating multiple test controller instances in the same test run
+        $className = 'TestController' . md5(uniqid('', true));
+
+        $code = "
+            class {$className} extends {$controllerName} {
                 protected function redirectTo(string \$location): void {
                     echo 'Location: ' . \$location;
                 }
             }
-            ";
+        ";
 
-            eval($code);
-        }
+        eval($code);
 
-        return new \OverriddenController(); // @phpstan-ignore-line
+        return new $className();
     }
 }

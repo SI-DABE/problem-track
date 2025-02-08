@@ -4,6 +4,8 @@ namespace App\Services;
 
 use Core\Constants\Constants;
 use Core\Database\ActiveRecord\Model;
+use Core\Database\Database;
+use PDO;
 
 class ProfileAvatar
 {
@@ -18,7 +20,10 @@ class ProfileAvatar
     public function path(): string
     {
         if ($this->model->avatar_name) {
-            return $this->baseDir() . $this->model->avatar_name;
+            // Generate MD5 hash of the avatar file to use as cache buster in URL
+            $hash = md5_file($this->getAbsoluteSavedFilePath());
+            // Return the avatar URL with hash parameter to force browser to reload when file changes
+            return $this->baseDir() . $this->model->avatar_name . '?' . $hash;
         }
 
         return "/assets/images/defaults/avatar.png";
@@ -32,9 +37,23 @@ class ProfileAvatar
         $this->image = $image;
 
         if (!empty($this->getTmpFilePath())) {
-            $this->removeOldImage();
-            $this->model->update(['avatar_name' => $this->getFileName()]);
-            move_uploaded_file($this->getTmpFilePath(), $this->getAbsoluteFilePath());
+            $pdo = Database::getDatabaseConn();
+            $pdo->beginTransaction();
+
+            try {
+                $this->removeOldImage();
+
+                if (!move_uploaded_file($this->getTmpFilePath(), $this->getAbsoluteDestinationPath())) {
+                    throw new \RuntimeException('Failed to move uploaded file');
+                }
+
+                $this->model->update(['avatar_name' => $this->getFileName()]);
+
+                $pdo->commit();
+            } catch (\Exception $e) {
+                $pdo->rollBack();
+                throw $e;
+            }
         }
     }
 
@@ -47,7 +66,7 @@ class ProfileAvatar
     {
         if ($this->model->avatar_name) {
             $path = Constants::rootPath()->join('public' . $this->baseDir())->join($this->model->avatar_name);
-            unlink($path);
+            unlink($this->getAbsoluteSavedFilePath());
         }
     }
 
@@ -58,7 +77,7 @@ class ProfileAvatar
         return 'avatar.' . $file_extension;
     }
 
-    private function getAbsoluteFilePath(): string
+    private function getAbsoluteDestinationPath(): string
     {
         return $this->storeDir() . $this->getFileName();
     }
@@ -76,5 +95,10 @@ class ProfileAvatar
         }
 
         return $path;
+    }
+
+    private function getAbsoluteSavedFilePath(): string
+    {
+        return Constants::rootPath()->join('public' . $this->baseDir())->join($this->model->avatar_name);
     }
 }
