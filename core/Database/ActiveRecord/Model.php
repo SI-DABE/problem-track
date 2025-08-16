@@ -3,6 +3,7 @@
 namespace Core\Database\ActiveRecord;
 
 use Core\Database\Database;
+use Core\Database\QueryBuilder\SQLQueryBuilder;
 use Lib\Paginator;
 use Lib\StringUtils;
 use PDO;
@@ -42,6 +43,11 @@ abstract class Model
     }
 
     /* ------------------- MAGIC METHODS ------------------- */
+    private static function makeQueryBuilder(): SQLQueryBuilder
+    {
+       return Database::getQueryBuilder();
+    }
+
     public function __get(string $property): mixed
     {
         if (property_exists($this, $property)) {
@@ -145,13 +151,19 @@ abstract class Model
                 $attributes = implode(', ', static::$columns);
                 $values = ':' . implode(', :', static::$columns);
 
-                $sql = <<<SQL
-                    INSERT INTO {$table} ({$attributes}) VALUES ({$values});
-                SQL;
-
-                $stmt = $pdo->prepare($sql);
+                $data = [];
                 foreach (static::$columns as $column) {
-                    $stmt->bindValue($column, $this->$column);
+                    $data[$column] = $this->$column;
+                }
+
+                $builder = Database::getQueryBuilder();
+                $sql = $builder
+                  ->insert($table, $data)
+                  ->getSQL();
+                $params = $builder->getParams();
+                $stmt = $pdo->prepare($sql);
+                foreach ($params as $param => $value) {
+                    $stmt->bindValue($param, $value);
                 }
 
                 $stmt->execute();
@@ -160,20 +172,20 @@ abstract class Model
             } else {
                 $table = static::$table;
 
-                $sets = array_map(function ($column) {
-                    return "{$column} = :{$column}";
-                }, static::$columns);
-                $sets = implode(', ', $sets);
-
-                $sql = <<<SQL
-                    UPDATE {$table} set {$sets} WHERE id = :id;
-                SQL;
-
-                $stmt = $pdo->prepare($sql);
-                $stmt->bindValue(':id', $this->id);
-
+                $data = [];
                 foreach (static::$columns as $column) {
-                    $stmt->bindValue($column, $this->$column);
+                    $data[$column] = $this->$column;
+                }
+
+                $builder = Database::getQueryBuilder();
+                $sql = $builder
+                  ->update($table, $data)
+                  ->where(['id' => $this->id])
+                  ->getSQL();
+                $params = $builder->getParams();
+                $stmt = $pdo->prepare($sql);
+                foreach ($params as $param => $value) {
+                    $stmt->bindValue($param, $value);
                 }
 
                 $stmt->execute();
@@ -190,22 +202,21 @@ abstract class Model
     {
         $table = static::$table;
 
-        $sets = array_map(function ($column) {
-            return "{$column} = :{$column}";
-        }, array_keys($data));
-        $sets = implode(', ', $sets);
+        $data = [];
+        foreach (static::$columns as $column) {
+          $data[$column] = $this->$column;
+        }
 
-        $sql = <<<SQL
-            UPDATE {$table} set {$sets} WHERE id = :id;
-        SQL;
-
+        $builder = Database::getQueryBuilder();
+        $sql = $builder
+          ->update($table, $data)
+          ->where(['id' => $this->id])
+          ->getSQL();
+        $params = $builder->getParams();
         $pdo = Database::getDatabaseConn();
         $stmt = $pdo->prepare($sql);
-        $stmt->bindValue(':id', $this->id);
-
-        foreach ($data as $column => $value) {
-            $stmt->bindValue($column, $value);
-            $this->$column = $value;
+        foreach ($params as $param => $value) {
+            $stmt->bindValue($param, $value);
         }
 
         $stmt->execute();
@@ -216,15 +227,18 @@ abstract class Model
     {
         $table = static::$table;
 
-        $sql = <<<SQL
-            DELETE FROM {$table} WHERE id = :id;
-        SQL;
-
+        $builder = Database::getQueryBuilder();
+        $sql = $builder
+          ->delete($table)
+          ->where(['id' => $this->id])
+          ->getSQL();
+        $params = $builder->getParams();
         $pdo = Database::getDatabaseConn();
 
         $stmt = $pdo->prepare($sql);
-        $stmt->bindValue(':id', $this->id);
-
+        foreach ($params as $param => $value) {
+            $stmt->bindValue($param, $value);
+        }
         $stmt->execute();
 
         return ($stmt->rowCount() != 0);
@@ -233,17 +247,17 @@ abstract class Model
     public static function findById(int $id): static|null
     {
         $pdo = Database::getDatabaseConn();
-
-        $attributes = implode(', ', static::$columns);
         $table = static::$table;
-
-        $sql = <<<SQL
-            SELECT id, {$attributes} FROM {$table} WHERE id = :id;
-        SQL;
-
+        $builder = static::makeQueryBuilder();
+        $sql = $builder
+          ->select($table, array_merge(['id'], static::$columns))
+          ->where(['id' => $id])
+          ->getSQL();
+        $params = $builder->getParams();
         $stmt = $pdo->prepare($sql);
-        $stmt->bindParam(':id', $id);
-
+        foreach ($params as $param => $value) {
+            $stmt->bindValue($param, $value);
+        }
         $stmt->execute();
 
         if ($stmt->rowCount() == 0) {
@@ -264,11 +278,10 @@ abstract class Model
 
         $attributes = implode(', ', static::$columns);
         $table = static::$table;
-
-        $sql = <<<SQL
-            SELECT id, {$attributes} FROM {$table};
-        SQL;
-
+        $builder = static::makeQueryBuilder();
+        $sql = $builder
+          ->select($table, array_merge(['id'], static::$columns))
+          ->getSQL();
         $pdo = Database::getDatabaseConn();
         $stmt = $pdo->prepare($sql);
         $stmt->execute();
@@ -300,23 +313,16 @@ abstract class Model
     public static function where(array $conditions): array
     {
         $table = static::$table;
-        $attributes = implode(', ', static::$columns);
-
-        $sql = <<<SQL
-            SELECT id, {$attributes} FROM {$table} WHERE 
-        SQL;
-
-        $sqlConditions = array_map(function ($column) {
-            return "{$column} = :{$column}";
-        }, array_keys($conditions));
-
-        $sql .= implode(' AND ', $sqlConditions);
-
+        $builder = static::makeQueryBuilder();
+        $sql = $builder
+          ->select($table, array_merge(['id'], static::$columns))
+          ->where($conditions)
+          ->getSQL();
+        $params = $builder->getParams();
         $pdo = Database::getDatabaseConn();
         $stmt = $pdo->prepare($sql);
-
-        foreach ($conditions as $column => $value) {
-            $stmt->bindValue($column, $value);
+        foreach ($params as $param => $value) {
+            $stmt->bindValue($param, $value);
         }
 
         $stmt->execute();

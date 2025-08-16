@@ -44,10 +44,11 @@ class ProfileAvatar
         }
 
         if ($this->updateFile()) {
+            $fileName = $this->getFileName();
             $this->model->update([
-                'avatar_name' => $this->getFileName(),
+                'avatar_name' => $fileName,
             ]);
-
+            $this->model->avatar_name = $fileName;
             return true;
         }
 

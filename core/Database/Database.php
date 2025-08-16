@@ -4,6 +4,7 @@ namespace Core\Database;
 
 use Core\Constants\Constants;
 use PDO;
+use Core\Database\QueryBuilder\SQLQueryBuilder;
 
 class Database
 {
@@ -55,5 +56,10 @@ class Database
     public static function exec(string $sql): void
     {
         self::getDatabaseConn()->exec($sql);
+    }
+
+    public static function getQueryBuilder(): SQLQueryBuilder
+    {
+        return new SQLQueryBuilder();
     }
 }
