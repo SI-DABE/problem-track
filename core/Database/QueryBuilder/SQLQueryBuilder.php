@@ -36,6 +36,7 @@ class SQLQueryBuilder implements QueryBuilderContract
   {
     $this->reset();
     $this->query->table = $table;
+    $this->query->type = 'select';
     return $this;
   }
 
@@ -118,15 +119,16 @@ class SQLQueryBuilder implements QueryBuilderContract
 
   /**
    * Add a WHERE condition (supports AND/OR, operators, and parameter binding)
+   * Laravel style: where($field, $value) or where($field, $operator, $value)
    * @param string|array $field
    * @param mixed $value
-   * @param string $operator
+   * @param string|null $operator
    * @param string $boolean
    * @return $this
    */
-  public function where(string|array $field, mixed $value = null, string $operator = '=', string $boolean = 'AND'): static
+  public function where(string|array $field, mixed $value = null, string $operator = null, string $boolean = 'AND'): static
   {
-    if (!in_array($this->query->type, ['select', 'update', 'delete'])) {
+    if (!in_array($this->query->type ?? 'select', ['select', 'update', 'delete'])) {
       throw new Exception("WHERE can only be added to SELECT, UPDATE OR DELETE");
     }
     if (!isset($this->query->where)) {
@@ -137,10 +139,21 @@ class SQLQueryBuilder implements QueryBuilderContract
         $this->where($k, $v, '=', $boolean);
       }
     } else {
+      // Laravel style parameter handling
+      if ($operator === null) {
+        // where($field, $value) - operator defaults to '='
+        $actualOperator = '=';
+        $actualValue = $value;
+      } else {
+        // where($field, $operator, $value) - Laravel style: field, operator, value 
+        $actualOperator = $value;
+        $actualValue = $operator;
+      }
+      
       $param = $this->nextParam($field);
-      $clause = "$field $operator $param";
+      $clause = "$field $actualOperator $param";
       $this->query->where[] = [$clause, $boolean];
-      $this->params[$param] = $value;
+      $this->params[$param] = $actualValue;
     }
     return $this;
   }
@@ -149,7 +162,7 @@ class SQLQueryBuilder implements QueryBuilderContract
    * Add an OR WHERE condition
    * @throws Exception
    */
-  public function orWhere(string|array $field, mixed $value = null, string $operator = '='): static
+  public function orWhere(string|array $field, mixed $value = null, string $operator = null): static
   {
     return $this->where($field, $value, $operator, 'OR');
   }
@@ -315,6 +328,9 @@ class SQLQueryBuilder implements QueryBuilderContract
   {
     $connection = $this->connection ?? Database::getDatabaseConn();
     $originalSelect = $this->query->select ?? ['*'];
+    $originalType = $this->query->type ?? 'select';
+    
+    $this->query->type = 'select';
     $this->query->select = ["COUNT($column) as count"];
     
     $sql = $this->getSQL();
@@ -323,6 +339,7 @@ class SQLQueryBuilder implements QueryBuilderContract
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
     
     $this->query->select = $originalSelect;
+    $this->query->type = $originalType;
     
     return (int) ($result['count'] ?? 0);
   }
@@ -414,9 +431,106 @@ class SQLQueryBuilder implements QueryBuilderContract
   }
 
   /**
+   * Laravel style insert method
+   */
+  public function insertData(array $data): int
+  {
+    if (!isset($this->query->table)) {
+      throw new Exception("Table must be set before insert");
+    }
+
+    $connection = $this->connection ?? Database::getDatabaseConn();
+    
+    $columns = implode(", ", array_keys($data));
+    $placeholders = [];
+    $params = [];
+    
+    foreach ($data as $column => $value) {
+      $param = ':' . preg_replace('/[^a-zA-Z0-9_]/', '_', $column) . '_' . (++$this->paramCounter);
+      $placeholders[] = $param;
+      $params[$param] = $value;
+    }
+    
+    $sql = "INSERT INTO {$this->query->table} ($columns) VALUES (" . implode(", ", $placeholders) . ")";
+    $stmt = $connection->prepare($sql);
+    $stmt->execute($params);
+    
+    return (int) $connection->lastInsertId();
+  }
+
+  /**
+   * Laravel style update method
+   */
+  public function updateData(array $data): int
+  {
+    if (!isset($this->query->table)) {
+      throw new Exception("Table must be set before update");
+    }
+
+    // Ensure query type is set for WHERE validation
+    $this->query->type = 'update';
+
+    $connection = $this->connection ?? Database::getDatabaseConn();
+    
+    $sets = [];
+    $params = $this->params; // Include existing where params
+    
+    foreach ($data as $column => $value) {
+      $param = ':' . preg_replace('/[^a-zA-Z0-9_]/', '_', $column) . '_update_' . (++$this->paramCounter);
+      $sets[] = "$column = $param";
+      $params[$param] = $value;
+    }
+    
+    $sql = "UPDATE {$this->query->table} SET " . implode(", ", $sets);
+    
+    if (!empty($this->query->where)) {
+      $clauses = [];
+      foreach ($this->query->where as $i => [$clause, $boolean]) {
+        $clauses[] = ($i > 0 ? $boolean . ' ' : '') . $clause;
+      }
+      $sql .= ' WHERE ' . implode(' ', $clauses);
+    }
+    
+    $stmt = $connection->prepare($sql);
+    $stmt->execute($params);
+    
+    return $stmt->rowCount();
+  }
+
+  /**
+   * Laravel style delete method
+   */
+  public function deleteData(): int
+  {
+    if (!isset($this->query->table)) {
+      throw new Exception("Table must be set before delete");
+    }
+
+    // Ensure query type is set for WHERE validation
+    $this->query->type = 'delete';
+
+    $connection = $this->connection ?? Database::getDatabaseConn();
+    
+    $sql = "DELETE FROM {$this->query->table}";
+    
+    if (!empty($this->query->where)) {
+      $clauses = [];
+      foreach ($this->query->where as $i => [$clause, $boolean]) {
+        $clauses[] = ($i > 0 ? $boolean . ' ' : '') . $clause;
+      }
+      $sql .= ' WHERE ' . implode(' ', $clauses);
+    }
+    
+    $stmt = $connection->prepare($sql);
+    $stmt->execute($this->params);
+    
+    return $stmt->rowCount();
+  }
+
+  /**
    * Execute query (for insert, update, delete)
    */
-  public function execute(): bool|int
+  public function execute()
   {
     $connection = $this->connection ?? Database::getDatabaseConn();
     $sql = $this->getSQL();

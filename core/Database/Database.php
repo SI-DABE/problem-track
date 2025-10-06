@@ -78,6 +78,38 @@ class Database
     }
 
     /**
+     * Laravel style insert using QueryBuilder
+     */
+    public static function insertTable(string $table, array $data): int
+    {
+        return self::table($table)->insertData($data);
+    }
+
+    /**
+     * Laravel style update using QueryBuilder  
+     */
+    public static function updateTable(string $table, array $data, array $where = []): int
+    {
+        $builder = self::table($table);
+        foreach ($where as $field => $value) {
+            $builder->where($field, $value);
+        }
+        return $builder->updateData($data);
+    }
+
+    /**
+     * Laravel style delete using QueryBuilder
+     */
+    public static function deleteTable(string $table, array $where = []): int
+    {
+        $builder = self::table($table);
+        foreach ($where as $field => $value) {
+            $builder->where($field, $value);
+        }
+        return $builder->deleteData();
+    }
+
+    /**
      * Begin transaction (Laravel style)
      */
     public static function beginTransaction(): void
