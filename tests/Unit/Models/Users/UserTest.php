@@ -7,6 +7,8 @@ use Tests\TestCase;
 
 class UserTest extends TestCase
 {
+    protected $usesDatabase = true;
+    
     private User $user;
     private User $user2;
 

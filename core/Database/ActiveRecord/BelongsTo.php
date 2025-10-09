@@ -2,6 +2,8 @@
 
 namespace Core\Database\ActiveRecord;
 
+use Core\Database\Database;
+
 class BelongsTo
 {
     public function __construct(
@@ -11,9 +13,19 @@ class BelongsTo
     ) {
     }
 
-    public function get(): Model
+    public function get(): ?Model
     {
-        $attribute = $this->foreignKey;
-        return $this->related::findBy(['id' => $this->model->$attribute]);
+        $foreignKeyValue = $this->model->{$this->foreignKey};
+        
+        if (!$foreignKeyValue) {
+            return null;
+        }
+
+        $row = Database::table($this->related::table())
+            ->selectColumns(array_merge(['id'], $this->related::columns()))
+            ->where('id', $foreignKeyValue)
+            ->first();
+            
+        return $row ? new $this->related($row) : null;
     }
 }

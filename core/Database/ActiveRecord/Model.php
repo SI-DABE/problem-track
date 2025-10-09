@@ -145,54 +145,39 @@ abstract class Model
     public function save(): bool
     {
         if ($this->isValid()) {
-            $pdo = Database::getDatabaseConn();
             if ($this->newRecord()) {
-                $table = static::$table;
-                $attributes = implode(', ', static::$columns);
-                $values = ':' . implode(', :', static::$columns);
-
-                $data = [];
-                foreach (static::$columns as $column) {
-                    $data[$column] = $this->$column;
-                }
-
-                $builder = Database::getQueryBuilder();
-                $sql = $builder
-                  ->insert($table, $data)
-                  ->getSQL();
-                $params = $builder->getParams();
-                $stmt = $pdo->prepare($sql);
-                foreach ($params as $param => $value) {
-                    $stmt->bindValue($param, $value);
-                }
-
-                $stmt->execute();
-
-                $this->id = (int) $pdo->lastInsertId();
+                return $this->createRecord();
             } else {
-                $table = static::$table;
-
-                $data = [];
-                foreach (static::$columns as $column) {
-                    $data[$column] = $this->$column;
-                }
-
-                $builder = Database::getQueryBuilder();
-                $sql = $builder
-                  ->update($table, $data)
-                  ->where(['id' => $this->id])
-                  ->getSQL();
-                $params = $builder->getParams();
-                $stmt = $pdo->prepare($sql);
-                foreach ($params as $param => $value) {
-                    $stmt->bindValue($param, $value);
-                }
-
-                $stmt->execute();
+                return $this->updateRecord();
             }
-            return true;
         }
         return false;
+    }
+
+    private function createRecord(): bool
+    {
+        $data = $this->getAttributesForSave();
+        $id = Database::table(static::$table)->insertData($data);
+        $this->id = $id;
+        return true;
+    }
+
+    private function updateRecord(): bool
+    {
+        $data = $this->getAttributesForSave();
+        $rowsAffected = Database::table(static::$table)
+            ->where('id', $this->id)
+            ->updateData($data);
+        return $rowsAffected > 0;
+    }
+
+    private function getAttributesForSave(): array
+    {
+        $data = [];
+        foreach (static::$columns as $column) {
+            $data[$column] = $this->$column;
+        }
+        return $data;
     }
 
     /**
@@ -200,73 +185,32 @@ abstract class Model
      */
     public function update(array $data): bool
     {
-        $table = static::$table;
-
-        $data = [];
-        foreach (static::$columns as $column) {
-          $data[$column] = $this->$column;
+        // Update model attributes
+        foreach ($data as $key => $value) {
+            if (array_key_exists($key, $this->attributes)) {
+                $this->$key = $value;
+            }
         }
 
-        $builder = Database::getQueryBuilder();
-        $sql = $builder
-          ->update($table, $data)
-          ->where(['id' => $this->id])
-          ->getSQL();
-        $params = $builder->getParams();
-        $pdo = Database::getDatabaseConn();
-        $stmt = $pdo->prepare($sql);
-        foreach ($params as $param => $value) {
-            $stmt->bindValue($param, $value);
-        }
-
-        $stmt->execute();
-        return ($stmt->rowCount() !== 0);
+        return $this->updateRecord();
     }
 
     public function destroy(): bool
     {
-        $table = static::$table;
-
-        $builder = Database::getQueryBuilder();
-        $sql = $builder
-          ->delete($table)
-          ->where(['id' => $this->id])
-          ->getSQL();
-        $params = $builder->getParams();
-        $pdo = Database::getDatabaseConn();
-
-        $stmt = $pdo->prepare($sql);
-        foreach ($params as $param => $value) {
-            $stmt->bindValue($param, $value);
-        }
-        $stmt->execute();
-
-        return ($stmt->rowCount() != 0);
+        $rowsAffected = Database::table(static::$table)
+            ->where('id', $this->id)
+            ->deleteData();
+        return $rowsAffected > 0;
     }
 
     public static function findById(int $id): static|null
     {
-        $pdo = Database::getDatabaseConn();
-        $table = static::$table;
-        $builder = static::makeQueryBuilder();
-        $sql = $builder
-          ->select($table, array_merge(['id'], static::$columns))
-          ->where(['id' => $id])
-          ->getSQL();
-        $params = $builder->getParams();
-        $stmt = $pdo->prepare($sql);
-        foreach ($params as $param => $value) {
-            $stmt->bindValue($param, $value);
-        }
-        $stmt->execute();
+        $row = Database::table(static::$table)
+            ->selectColumns(array_merge(['id'], static::$columns))
+            ->where('id', $id)
+            ->first();
 
-        if ($stmt->rowCount() == 0) {
-            return null;
-        }
-
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        return new static($row);
+        return $row ? new static($row) : null;
     }
 
     /**
@@ -274,24 +218,11 @@ abstract class Model
      */
     public static function all(): array
     {
-        $models = [];
+        $rows = Database::table(static::$table)
+            ->selectColumns(array_merge(['id'], static::$columns))
+            ->get();
 
-        $attributes = implode(', ', static::$columns);
-        $table = static::$table;
-        $builder = static::makeQueryBuilder();
-        $sql = $builder
-          ->select($table, array_merge(['id'], static::$columns))
-          ->getSQL();
-        $pdo = Database::getDatabaseConn();
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute();
-        $resp = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        foreach ($resp as $row) {
-            $models[] = new static($row);
-        }
-
-        return $models;
+        return array_map(fn($row) => new static($row), $rows);
     }
 
     public static function paginate(int $page = 1, int $per_page = 10, string $route = null): Paginator
@@ -312,27 +243,15 @@ abstract class Model
      */
     public static function where(array $conditions): array
     {
-        $table = static::$table;
-        $builder = static::makeQueryBuilder();
-        $sql = $builder
-          ->select($table, array_merge(['id'], static::$columns))
-          ->where($conditions)
-          ->getSQL();
-        $params = $builder->getParams();
-        $pdo = Database::getDatabaseConn();
-        $stmt = $pdo->prepare($sql);
-        foreach ($params as $param => $value) {
-            $stmt->bindValue($param, $value);
+        $builder = Database::table(static::$table)
+            ->selectColumns(array_merge(['id'], static::$columns));
+
+        foreach ($conditions as $field => $value) {
+            $builder->where($field, $value);
         }
 
-        $stmt->execute();
-        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        $models = [];
-        foreach ($rows as $row) {
-            $models[] = new static($row);
-        }
-        return $models;
+        $rows = $builder->get();
+        return array_map(fn($row) => new static($row), $rows);
     }
 
     /**
@@ -340,11 +259,15 @@ abstract class Model
      */
     public static function findBy($conditions): ?static
     {
-        $resp = self::where($conditions);
-        if (isset($resp[0]))
-            return $resp[0];
+        $builder = Database::table(static::$table)
+            ->selectColumns(array_merge(['id'], static::$columns));
 
-        return null;
+        foreach ($conditions as $field => $value) {
+            $builder->where($field, $value);
+        }
+
+        $row = $builder->first();
+        return $row ? new static($row) : null;
     }
 
     /**
@@ -352,8 +275,69 @@ abstract class Model
      */
     public static function exists($conditions): bool
     {
-        $resp = self::where($conditions);
-        return !empty($resp);
+        $builder = Database::table(static::$table);
+
+        foreach ($conditions as $field => $value) {
+            $builder->where($field, $value);
+        }
+
+        return $builder->exists();
+    }
+
+    /**
+     * Create new record (Laravel style)
+     * @param array<string, mixed> $data
+     */
+    public static function create(array $data): static
+    {
+        $model = new static($data);
+        $model->save();
+        return $model;
+    }
+
+    /**
+     * Get query builder for this model (Laravel style)
+     */
+    public static function query(): SQLQueryBuilder
+    {
+        return Database::table(static::$table)
+            ->selectColumns(array_merge(['id'], static::$columns));
+    }
+
+    /**
+     * Find record or create if not exists (Laravel style)
+     * @param array<string, mixed> $conditions
+     * @param array<string, mixed> $data
+     */
+    public static function firstOrCreate(array $conditions, array $data = []): static
+    {
+        $model = self::findBy($conditions);
+        if ($model) {
+            return $model;
+        }
+
+        return self::create(array_merge($conditions, $data));
+    }
+
+    /**
+     * Find record or fail (Laravel style)
+     * @param int $id
+     */
+    public static function findOrFail(int $id): static
+    {
+        $model = self::findById($id);
+        if (!$model) {
+            throw new \Exception("Model with ID $id not found");
+        }
+        return $model;
+    }
+
+    /**
+     * Get count of records (Laravel style)
+     */
+    public static function count(): int
+    {
+        return Database::table(static::$table)->count();
     }
 
     /* ------------------- RELATIONSHIPS METHODS ------------------- */

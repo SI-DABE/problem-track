@@ -22,10 +22,7 @@ class ProfileAvatar
     public function path(): string
     {
         if ($this->model->avatar_name) {
-            // Generate MD5 hash of the avatar file to use as cache buster in URL
             $hash = md5_file($this->getAbsoluteSavedFilePath());
-
-            // Return the avatar URL with hash parameter to force browser to reload when file changes
             return $this->baseDir() . $this->model->avatar_name . '?' . $hash;
         }
 

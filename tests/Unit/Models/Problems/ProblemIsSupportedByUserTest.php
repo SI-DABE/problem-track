@@ -9,6 +9,8 @@ use Tests\TestCase;
 
 class ProblemIsSupportedByUserTest extends TestCase
 {
+    protected $usesDatabase = true;
+    
     public function test_is_supported_by_user(): void
     {
         $user = new User([

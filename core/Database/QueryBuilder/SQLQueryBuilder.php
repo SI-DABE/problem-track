@@ -121,12 +121,12 @@ class SQLQueryBuilder implements QueryBuilderContract
    * Add a WHERE condition (supports AND/OR, operators, and parameter binding)
    * Laravel style: where($field, $value) or where($field, $operator, $value)
    * @param string|array $field
+   * @param mixed $operator
    * @param mixed $value
-   * @param string|null $operator
    * @param string $boolean
    * @return $this
    */
-  public function where(string|array $field, mixed $value = null, string $operator = null, string $boolean = 'AND'): static
+  public function where(string|array $field, mixed $operator = null, mixed $value = null, string $boolean = 'AND'): static
   {
     if (!in_array($this->query->type ?? 'select', ['select', 'update', 'delete'])) {
       throw new Exception("WHERE can only be added to SELECT, UPDATE OR DELETE");
@@ -136,18 +136,18 @@ class SQLQueryBuilder implements QueryBuilderContract
     }
     if (is_array($field)) {
       foreach ($field as $k => $v) {
-        $this->where($k, $v, '=', $boolean);
+        $this->where($k, '=', $v, $boolean);
       }
     } else {
       // Laravel style parameter handling
-      if ($operator === null) {
+      if ($value === null) {
         // where($field, $value) - operator defaults to '='
         $actualOperator = '=';
-        $actualValue = $value;
+        $actualValue = $operator;
       } else {
         // where($field, $operator, $value) - Laravel style: field, operator, value 
-        $actualOperator = $value;
-        $actualValue = $operator;
+        $actualOperator = $operator;
+        $actualValue = $value;
       }
       
       $param = $this->nextParam($field);
@@ -162,9 +162,9 @@ class SQLQueryBuilder implements QueryBuilderContract
    * Add an OR WHERE condition
    * @throws Exception
    */
-  public function orWhere(string|array $field, mixed $value = null, string $operator = null): static
+  public function orWhere(string|array $field, mixed $operator = null, mixed $value = null): static
   {
-    return $this->where($field, $value, $operator, 'OR');
+    return $this->where($field, $operator, $value, 'OR');
   }
 
   /**
@@ -206,21 +206,6 @@ class SQLQueryBuilder implements QueryBuilderContract
   }
 
   /**
-   * @param int $start
-   * @param int $offset
-   * @return $this
-   * @throws Exception
-   */
-  public function limit(int $start, int $offset): static
-  {
-    if ($this->query->type !== 'select') {
-      throw new Exception("LIMIT can only be added to SELECT");
-    }
-    $this->query->limit = " LIMIT $start, $offset";
-    return $this;
-  }
-
-  /**
    * @return string
    */
   public function getSQL(): string
@@ -229,7 +214,8 @@ class SQLQueryBuilder implements QueryBuilderContract
     
     if (($this->query->type ?? 'select') === 'select' && isset($this->query->table)) {
       $select = implode(", ", $this->query->select ?? ['*']);
-      $sql = "SELECT $select FROM " . $this->query->table;
+      $distinct = isset($this->query->distinct) && $this->query->distinct ? 'DISTINCT ' : '';
+      $sql = "SELECT $distinct$select FROM " . $this->query->table;
       
       if (!empty($this->query->joins)) {
         $sql .= ' ' . implode(' ', $this->query->joins);
@@ -326,12 +312,52 @@ class SQLQueryBuilder implements QueryBuilderContract
    */
   public function count(string $column = '*'): int
   {
+    return $this->aggregate('COUNT', $column);
+  }
+
+  /**
+   * Get maximum value (Laravel style)
+   */
+  public function max(string $column): mixed
+  {
+    return $this->aggregate('MAX', $column);
+  }
+
+  /**
+   * Get minimum value (Laravel style)
+   */
+  public function min(string $column): mixed
+  {
+    return $this->aggregate('MIN', $column);
+  }
+
+  /**
+   * Get average value (Laravel style)
+   */
+  public function avg(string $column): mixed
+  {
+    return $this->aggregate('AVG', $column);
+  }
+
+  /**
+   * Get sum of values (Laravel style)
+   */
+  public function sum(string $column): mixed
+  {
+    return $this->aggregate('SUM', $column);
+  }
+
+  /**
+   * Execute aggregate function
+   */
+  protected function aggregate(string $function, string $column): mixed
+  {
     $connection = $this->connection ?? Database::getDatabaseConn();
     $originalSelect = $this->query->select ?? ['*'];
     $originalType = $this->query->type ?? 'select';
     
     $this->query->type = 'select';
-    $this->query->select = ["COUNT($column) as count"];
+    $this->query->select = ["$function($column) as aggregate"];
     
     $sql = $this->getSQL();
     $stmt = $connection->prepare($sql);
@@ -341,7 +367,51 @@ class SQLQueryBuilder implements QueryBuilderContract
     $this->query->select = $originalSelect;
     $this->query->type = $originalType;
     
-    return (int) ($result['count'] ?? 0);
+    return $result['aggregate'] ?? null;
+  }
+
+  /**
+   * Check if records exist (Laravel style)
+   */
+  public function exists(): bool
+  {
+    return $this->count() > 0;
+  }
+
+  /**
+   * Check if records don't exist (Laravel style)
+   */
+  public function doesntExist(): bool
+  {
+    return !$this->exists();
+  }
+
+  /**
+   * Get a single column value (Laravel style)
+   */
+  public function value(string $column): mixed
+  {
+    $result = $this->selectColumns([$column])->first();
+    return $result[$column] ?? null;
+  }
+
+  /**
+   * Get an array of column values (Laravel style)
+   */
+  public function pluck(string $column, string $key = null): array
+  {
+    $columns = $key ? [$column, $key] : [$column];
+    $results = $this->selectColumns($columns)->get();
+    
+    if (!$key) {
+      return array_column($results, $column);
+    }
+    
+    $plucked = [];
+    foreach ($results as $row) {
+      $plucked[$row[$key]] = $row[$column];
+    }
+    return $plucked;
   }
 
   /**
@@ -379,6 +449,151 @@ class SQLQueryBuilder implements QueryBuilderContract
   }
 
   /**
+   * Order by descending (Laravel style)
+   */
+  public function orderByDesc(string $column): static
+  {
+    return $this->orderBy($column, 'DESC');
+  }
+
+  /**
+   * Get first result or fail (Laravel style)
+   */
+  public function firstOrFail(): array
+  {
+    $result = $this->first();
+    if ($result === null) {
+      throw new Exception("No records found");
+    }
+    return $result;
+  }
+
+  /**
+   * Add distinct to query (Laravel style)
+   */
+  public function distinct(): static
+  {
+    if (!isset($this->query->distinct)) {
+      $this->query->distinct = true;
+    }
+    return $this;
+  }
+
+  /**
+   * Add select columns to existing query (Laravel style)
+   */
+  public function addSelect(array $columns): static
+  {
+    if (!isset($this->query->select)) {
+      $this->query->select = ['*'];
+    }
+    
+    $this->query->select = array_merge($this->query->select, $columns);
+    return $this;
+  }
+
+  /**
+   * OR WHERE IN clause (Laravel style)
+   */
+  public function orWhereIn(string $field, array $values): static
+  {
+    return $this->whereIn($field, $values, 'OR');
+  }
+
+  /**
+   * OR WHERE NOT IN clause (Laravel style)
+   */
+  public function orWhereNotIn(string $field, array $values): static
+  {
+    return $this->whereNotIn($field, $values, 'OR');
+  }
+
+  /**
+   * OR WHERE NULL clause (Laravel style)
+   */
+  public function orWhereNull(string $field): static
+  {
+    return $this->whereNull($field, 'OR');
+  }
+
+  /**
+   * OR WHERE NOT NULL clause (Laravel style)
+   */
+  public function orWhereNotNull(string $field): static
+  {
+    return $this->whereNotNull($field, 'OR');
+  }
+
+  /**
+   * OR WHERE BETWEEN clause (Laravel style)
+   */
+  public function orWhereBetween(string $field, array $values): static
+  {
+    return $this->whereBetween($field, $values, 'OR');
+  }
+
+  /**
+   * OR WHERE NOT BETWEEN clause (Laravel style)
+   */
+  public function orWhereNotBetween(string $field, array $values): static
+  {
+    return $this->whereNotBetween($field, $values, 'OR');
+  }
+
+  /**
+   * WHERE LIKE clause (Laravel style)
+   */
+  public function whereLike(string $field, string $value, string $boolean = 'AND'): static
+  {
+    return $this->where($field, 'LIKE', $value, $boolean);
+  }
+
+  /**
+   * OR WHERE LIKE clause (Laravel style)
+   */
+  public function orWhereLike(string $field, string $value): static
+  {
+    return $this->whereLike($field, $value, 'OR');
+  }
+
+  /**
+   * Laravel style limit (standard)
+   */
+  public function limit(int $limit): static
+  {
+    $this->query->limit = $limit;
+    return $this;
+  }
+
+  /**
+   * Laravel style offset (standard)
+   */
+  public function offset(int $offset): static
+  {
+    $this->query->offset = $offset;
+    return $this;
+  }
+
+  /**
+   * Random ordering (Laravel style)
+   */
+  public function inRandomOrder(): static
+  {
+    return $this->orderBy('RAND()');
+  }
+
+  /**
+   * Conditional WHERE clause (Laravel style)
+   */
+  public function when(mixed $condition, callable $callback): static
+  {
+    if ($condition) {
+      $callback($this);
+    }
+    return $this;
+  }
+
+  /**
    * WHERE IN clause (Laravel style)
    */
   public function whereIn(string $field, array $values, string $boolean = 'AND'): static
@@ -400,6 +615,133 @@ class SQLQueryBuilder implements QueryBuilderContract
 
     $clause = "$field IN (" . implode(', ', $placeholders) . ")";
     $this->query->where[] = [$clause, $boolean];
+
+    return $this;
+  }
+
+  /**
+   * WHERE NOT IN clause (Laravel style)
+   */
+  public function whereNotIn(string $field, array $values, string $boolean = 'AND'): static
+  {
+    if (empty($values)) {
+      return $this;
+    }
+
+    $placeholders = [];
+    foreach ($values as $value) {
+      $param = $this->nextParam($field);
+      $placeholders[] = $param;
+      $this->params[$param] = $value;
+    }
+
+    if (!isset($this->query->where)) {
+      $this->query->where = [];
+    }
+
+    $clause = "$field NOT IN (" . implode(', ', $placeholders) . ")";
+    $this->query->where[] = [$clause, $boolean];
+
+    return $this;
+  }
+
+  /**
+   * WHERE NULL clause (Laravel style)
+   */
+  public function whereNull(string $field, string $boolean = 'AND'): static
+  {
+    if (!isset($this->query->where)) {
+      $this->query->where = [];
+    }
+
+    $clause = "$field IS NULL";
+    $this->query->where[] = [$clause, $boolean];
+
+    return $this;
+  }
+
+  /**
+   * WHERE NOT NULL clause (Laravel style)
+   */
+  public function whereNotNull(string $field, string $boolean = 'AND'): static
+  {
+    if (!isset($this->query->where)) {
+      $this->query->where = [];
+    }
+
+    $clause = "$field IS NOT NULL";
+    $this->query->where[] = [$clause, $boolean];
+
+    return $this;
+  }
+
+  /**
+   * WHERE BETWEEN clause (Laravel style)
+   */
+  public function whereBetween(string $field, array $values, string $boolean = 'AND'): static
+  {
+    if (count($values) !== 2) {
+      throw new Exception("whereBetween requires exactly 2 values");
+    }
+
+    $param1 = $this->nextParam($field);
+    $param2 = $this->nextParam($field);
+    $this->params[$param1] = $values[0];
+    $this->params[$param2] = $values[1];
+
+    if (!isset($this->query->where)) {
+      $this->query->where = [];
+    }
+
+    $clause = "$field BETWEEN $param1 AND $param2";
+    $this->query->where[] = [$clause, $boolean];
+
+    return $this;
+  }
+
+  /**
+   * WHERE NOT BETWEEN clause (Laravel style)
+   */
+  public function whereNotBetween(string $field, array $values, string $boolean = 'AND'): static
+  {
+    if (count($values) !== 2) {
+      throw new Exception("whereNotBetween requires exactly 2 values");
+    }
+
+    $param1 = $this->nextParam($field);
+    $param2 = $this->nextParam($field);
+    $this->params[$param1] = $values[0];
+    $this->params[$param2] = $values[1];
+
+    if (!isset($this->query->where)) {
+      $this->query->where = [];
+    }
+
+    $clause = "$field NOT BETWEEN $param1 AND $param2";
+    $this->query->where[] = [$clause, $boolean];
+
+    return $this;
+  }
+
+  /**
+   * WHERE DATE clause (Laravel style)
+   */
+  public function whereDate(string $field, string $operator, string $value = null): static
+  {
+    if ($value === null) {
+      $value = $operator;
+      $operator = '=';
+    }
+
+    $param = $this->nextParam($field);
+    $this->params[$param] = $value;
+
+    if (!isset($this->query->where)) {
+      $this->query->where = [];
+    }
+
+    $clause = "DATE($field) $operator $param";
+    $this->query->where[] = [$clause, 'AND'];
 
     return $this;
   }

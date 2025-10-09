@@ -9,6 +9,8 @@ use Tests\TestCase;
 
 class UserReinforceProblemTest extends TestCase
 {
+    protected $usesDatabase = true;
+    
     private User $user;
     private Problem $problem;
 

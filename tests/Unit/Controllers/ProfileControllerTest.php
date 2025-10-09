@@ -51,7 +51,6 @@ class ProfileControllerTest extends ControllerTestCase
             'base_uri' => 'http://web:8080'
         ]);
 
-        // Login first
         $resp = $client->post('/login', [
             'form_params' => [
                 'user[email]' => 'fulano@example.com',
@@ -92,22 +91,18 @@ class ProfileControllerTest extends ControllerTestCase
             return;
         }
 
-        // Get all files and subdirectories inside the directory
-        $items = array_diff(scandir($dir), array('.', '..')); // Exclude '.' and '..'
+        $items = array_diff(scandir($dir), array('.', '..'));
 
         foreach ($items as $item) {
             $itemPath = $dir . DIRECTORY_SEPARATOR . $item;
 
-            // If it's a directory, call the function recursively
             if (is_dir($itemPath)) {
-                $this->removeDirectory($itemPath); // Recursively remove subdirectory
+                $this->removeDirectory($itemPath);
             } else {
-                // If it's a file, delete it
                 unlink($itemPath);
             }
         }
 
-        // Once all files and subdirectories are deleted, remove the main directory
         rmdir($dir);
     }
 }
