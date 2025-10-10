@@ -67,12 +67,21 @@ class SQLQueryBuilder implements QueryBuilderContract
   }
 
   /**
-   * @param string $table
-   * @param array $data
-   * @return $this
+   * Insert method that supports both patterns:
+   * - insert($table, $data) for direct usage
+   * - insert($data) for fluent usage after table() call
+   * @param string|array $tableOrData
+   * @param array|null $data
+   * @return $this|int
    */
-  public function insert(string $table, array $data): static
+  public function insert(string|array $tableOrData, array $data = null): static|int
   {
+    // If first parameter is array, assume fluent usage: Database::table('users')->insert([...])
+    if (is_array($tableOrData)) {
+      return $this->insertData($tableOrData);
+    }
+    
+    // If first parameter is string, assume direct usage: insert('users', [...])
     $this->reset();
     $columns = implode(", ", array_keys($data));
     $placeholders = [];
@@ -81,18 +90,27 @@ class SQLQueryBuilder implements QueryBuilderContract
       $placeholders[] = $param;
       $this->params[$param] = $value;
     }
-    $this->query->base = "INSERT INTO $table ($columns) VALUES (" . implode(", ", $placeholders) . ")";
+    $this->query->base = "INSERT INTO $tableOrData ($columns) VALUES (" . implode(", ", $placeholders) . ")";
     $this->query->type = 'insert';
     return $this;
   }
 
   /**
-   * @param string $table
-   * @param array $data
-   * @return $this
+   * Update method that supports both patterns:
+   * - update($table, $data) for direct usage
+   * - update($data) for fluent usage after table() call
+   * @param string|array $tableOrData
+   * @param array|null $data
+   * @return $this|int
    */
-  public function update(string $table, array $data): static
+  public function update(string|array $tableOrData, array $data = null): static|int
   {
+    // If first parameter is array, assume fluent usage: Database::table('users')->update([...])
+    if (is_array($tableOrData)) {
+      return $this->updateData($tableOrData);
+    }
+    
+    // If first parameter is string, assume direct usage: update('users', [...])
     $this->reset();
     $sets = [];
     foreach ($data as $column => $value) {
@@ -100,17 +118,26 @@ class SQLQueryBuilder implements QueryBuilderContract
       $sets[] = "$column = $param";
       $this->params[$param] = $value;
     }
-    $this->query->base = "UPDATE $table SET " . implode(", ", $sets);
+    $this->query->base = "UPDATE $tableOrData SET " . implode(", ", $sets);
     $this->query->type = 'update';
     return $this;
   }
 
   /**
-   * @param string $table
-   * @return $this
+   * Delete method that supports both patterns:
+   * - delete($table) for direct usage
+   * - delete() for fluent usage after table() call
+   * @param string|null $table
+   * @return $this|int
    */
-  public function delete(string $table): static
+  public function delete(string $table = null): static|int
   {
+    // If no parameter, assume fluent usage: Database::table('users')->delete()
+    if ($table === null) {
+      return $this->deleteData();
+    }
+    
+    // If parameter provided, assume direct usage: delete('users')
     $this->reset();
     $this->query->base = "DELETE FROM $table";
     $this->query->type = 'delete';

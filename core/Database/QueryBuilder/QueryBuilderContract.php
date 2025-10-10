@@ -5,9 +5,9 @@ namespace Core\Database\QueryBuilder;
 interface QueryBuilderContract
 {
     public function select(string $table, array $fields): QueryBuilderContract;
-    public function insert(string $table, array $data): QueryBuilderContract;
-    public function update(string $table, array $data): QueryBuilderContract;
-    public function delete(string $table): QueryBuilderContract;
+    public function insert(string|array $tableOrData, array $data = null): QueryBuilderContract|int;
+    public function update(string|array $tableOrData, array $data = null): QueryBuilderContract|int;
+    public function delete(string $table = null): QueryBuilderContract|int;
     public function where(string|array $field, mixed $operator = null, mixed $value = null, string $boolean = 'AND'): QueryBuilderContract;
     public function orWhere(string|array $field, mixed $operator = null, mixed $value = null): QueryBuilderContract;
     public function orderBy(string $field, string $direction = 'ASC'): QueryBuilderContract;
