@@ -24,13 +24,11 @@ class ProblemTest extends TestCase
         ]);
         $this->user->save();
 
-        // Don't save the problem in setUp - let each test decide
         $this->problem = new Problem(['title' => 'Problem 1', 'user_id' => $this->user->id]);
     }
 
     public function test_should_create_new_problem(): void
     {
-        // Create a new problem for this test
         $newProblem = new Problem(['title' => 'New Problem', 'user_id' => $this->user->id]);
         $this->assertTrue($newProblem->save());
         $this->assertCount(1, Problem::all());
@@ -38,7 +36,6 @@ class ProblemTest extends TestCase
 
     public function test_all_should_return_all_problems(): void
     {
-        // Save the first problem
         $this->problem->save();
         
         $problems[] = $this->problem;
@@ -52,7 +49,6 @@ class ProblemTest extends TestCase
 
     public function test_destroy_should_remove_the_problem(): void
     {
-        // Save the first problem
         $this->problem->save();
         
         $problem2 = $this->user->problems()->new(['title' => 'Problem 2']);

@@ -140,17 +140,14 @@ class LaravelCompatibilityTest extends TestCase
 
     public function test_aggregate_methods(): void
     {
-        // Test count - should work even with empty table
         $this->assertIsInt($this->builder->count());
         
-        // Create a test user first to ensure we have data
         Database::table('users')->insertData([
             'name' => 'Test User',
             'email' => 'test@example.com',
             'encrypted_password' => 'hashed_password'
         ]);
         
-        // Now test aggregates - they should work with real data
         $this->assertIsNumeric($this->builder->max('id'));
         $this->assertIsNumeric($this->builder->min('id'));
         $this->assertIsNumeric($this->builder->avg('id'));

@@ -47,7 +47,7 @@ class ProfileControllerTest extends ControllerTestCase
         $cookieJar = new \GuzzleHttp\Cookie\CookieJar();
 
         $client = new Client([
-            'allow_redirects' => false, // Disable following redirects
+            'allow_redirects' => false,
             'base_uri' => 'http://web:8080'
         ]);
 
