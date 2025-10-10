@@ -139,13 +139,10 @@ class SQLQueryBuilder implements QueryBuilderContract
         $this->where($k, '=', $v, $boolean);
       }
     } else {
-      // Laravel style parameter handling
       if ($value === null) {
-        // where($field, $value) - operator defaults to '='
         $actualOperator = '=';
         $actualValue = $operator;
       } else {
-        // where($field, $operator, $value) - Laravel style: field, operator, value 
         $actualOperator = $operator;
         $actualValue = $value;
       }
@@ -270,8 +267,6 @@ class SQLQueryBuilder implements QueryBuilderContract
     return ':' . preg_replace('/[^a-zA-Z0-9_]/', '_', $field) . '_' . (++$this->paramCounter);
   }
 
-  // Laravel-style methods
-  
   /**
    * Execute the query and get results (Laravel style)
    */
@@ -809,13 +804,12 @@ class SQLQueryBuilder implements QueryBuilderContract
       throw new Exception("Table must be set before update");
     }
 
-    // Ensure query type is set for WHERE validation
     $this->query->type = 'update';
 
     $connection = $this->connection ?? Database::getDatabaseConn();
     
     $sets = [];
-    $params = $this->params; // Include existing where params
+    $params = $this->params;
     
     foreach ($data as $column => $value) {
       $param = ':' . preg_replace('/[^a-zA-Z0-9_]/', '_', $column) . '_update_' . (++$this->paramCounter);
@@ -848,7 +842,6 @@ class SQLQueryBuilder implements QueryBuilderContract
       throw new Exception("Table must be set before delete");
     }
 
-    // Ensure query type is set for WHERE validation
     $this->query->type = 'delete';
 
     $connection = $this->connection ?? Database::getDatabaseConn();

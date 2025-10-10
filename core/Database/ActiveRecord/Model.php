@@ -32,7 +32,6 @@ abstract class Model
      */
     public function __construct($params = [])
     {
-        // Initialize attributes with null from database columns
         foreach (static::$columns as $column) {
             $this->attributes[$column] = null;
         }
@@ -185,7 +184,6 @@ abstract class Model
      */
     public function update(array $data): bool
     {
-        // Update model attributes
         foreach ($data as $key => $value) {
             if (array_key_exists($key, $this->attributes)) {
                 $this->$key = $value;

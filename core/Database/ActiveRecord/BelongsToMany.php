@@ -23,7 +23,6 @@ class BelongsToMany
         $toTable = $this->related::table();
         $columns = array_merge(['id'], $this->related::columns());
         
-        // Build SELECT columns with table prefix
         $selectColumns = [];
         foreach ($columns as $column) {
             $selectColumns[] = "$toTable.$column";
