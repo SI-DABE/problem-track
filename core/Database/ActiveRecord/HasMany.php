@@ -2,6 +2,7 @@
 
 namespace Core\Database\ActiveRecord;
 
+use Core\Database\Database;
 use Lib\Paginator;
 
 class HasMany
@@ -18,7 +19,12 @@ class HasMany
      */
     public function get(): array
     {
-        return $this->related::where([$this->foreignKey => $this->model->id]);
+        $rows = Database::table($this->related::table())
+            ->selectColumns(array_merge(['id'], $this->related::columns()))
+            ->where($this->foreignKey, $this->model->id)
+            ->get();
+
+        return array_map(fn($row) => new $this->related($row), $rows);
     }
 
     /**
@@ -33,12 +39,13 @@ class HasMany
 
     public function findById(int $id): ?Model
     {
-        return $this->related::findBy(
-            [
-                $this->foreignKey => $this->model->id,
-                'id' => $id,
-            ]
-        );
+        $row = Database::table($this->related::table())
+            ->selectColumns(array_merge(['id'], $this->related::columns()))
+            ->where($this->foreignKey, $this->model->id)
+            ->where('id', $id)
+            ->first();
+
+        return $row ? new $this->related($row) : null;
     }
 
     public function paginate(int $page = 1, int $per_page = 10, string $route = null): Paginator

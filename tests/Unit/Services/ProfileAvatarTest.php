@@ -8,6 +8,8 @@ use Tests\TestCase;
 
 class ProfileAvatarTest extends TestCase
 {
+    protected $usesDatabase = true;
+    
     private ProfileAvatar $profileAvatar;
     private User $user;
 
@@ -47,7 +49,6 @@ class ProfileAvatarTest extends TestCase
 
     public function test_upload(): void
     {
-        // Create a mock using PHPUnit's MockBuilder
         $profileAvatar = $this->getMockBuilder(ProfileAvatar::class)
             ->setConstructorArgs([$this->user, [
                 'extension' => ['jpg', 'png'],
@@ -56,7 +57,6 @@ class ProfileAvatarTest extends TestCase
             ->onlyMethods(['updateFile'])
             ->getMock();
 
-        // Configure the mock to return true for updateFile
         $profileAvatar->expects($this->once())
             ->method('updateFile')
             ->willReturn(true);

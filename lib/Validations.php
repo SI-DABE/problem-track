@@ -63,7 +63,7 @@ class Validations
         $stmt = $pdo->prepare($sql);
 
         foreach ($fields as $field) {
-            $stmt->bindValue($field, $object->$field);
+            $stmt->bindValue(":$field", $object->$field);
         }
 
         $stmt->execute();

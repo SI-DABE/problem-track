@@ -8,6 +8,8 @@ use Tests\TestCase;
 
 class ProblemTest extends TestCase
 {
+    protected $usesDatabase = true;
+    
     private Problem $problem;
     private User $user;
 
@@ -23,17 +25,19 @@ class ProblemTest extends TestCase
         $this->user->save();
 
         $this->problem = new Problem(['title' => 'Problem 1', 'user_id' => $this->user->id]);
-        $this->problem->save();
     }
 
     public function test_should_create_new_problem(): void
     {
-        $this->assertTrue($this->problem->save());
+        $newProblem = new Problem(['title' => 'New Problem', 'user_id' => $this->user->id]);
+        $this->assertTrue($newProblem->save());
         $this->assertCount(1, Problem::all());
     }
 
     public function test_all_should_return_all_problems(): void
     {
+        $this->problem->save();
+        
         $problems[] = $this->problem;
         $problems[] = $this->user->problems()->new(['title' => 'Problem 2']);
         $problems[1]->save();
@@ -45,6 +49,8 @@ class ProblemTest extends TestCase
 
     public function test_destroy_should_remove_the_problem(): void
     {
+        $this->problem->save();
+        
         $problem2 = $this->user->problems()->new(['title' => 'Problem 2']);
 
         $problem2->save();

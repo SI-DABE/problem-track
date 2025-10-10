@@ -26,7 +26,6 @@ class RouteTest extends TestCase
         $routerReflection = new \ReflectionClass(Router::class);
         $instanceProperty = $routerReflection->getProperty('instance');
         $instanceProperty->setAccessible(true);
-        // Store the original instance
         $originalInstance = $instanceProperty->getValue();
 
         $routerMock = $this->createMock(Router::class);
@@ -44,7 +43,6 @@ class RouteTest extends TestCase
         $route = Route::get('/test', ['TestController', 'test']);
         $this->assertInstanceOf(Route::class, $route);
 
-        // Restore the original instance
         $instanceProperty->setValue(null, $originalInstance);
     }
 
@@ -53,7 +51,6 @@ class RouteTest extends TestCase
         $routerReflection = new \ReflectionClass(Router::class);
         $instanceProperty = $routerReflection->getProperty('instance');
         $instanceProperty->setAccessible(true);
-        // Store the original instance
         $originalInstance = $instanceProperty->getValue();
 
         $routerMock = $this->createMock(Router::class);
@@ -71,7 +68,6 @@ class RouteTest extends TestCase
         $route = Route::post('/test', ['TestController', 'test']);
         $this->assertInstanceOf(Route::class, $route);
 
-        // Restore the original instance
         $instanceProperty->setValue(null, $originalInstance);
     }
 
@@ -80,7 +76,6 @@ class RouteTest extends TestCase
         $routerReflection = new \ReflectionClass(Router::class);
         $instanceProperty = $routerReflection->getProperty('instance');
         $instanceProperty->setAccessible(true);
-        // Store the original instance
         $originalInstance = $instanceProperty->getValue();
 
         $routerMock = $this->createMock(Router::class);
@@ -98,7 +93,6 @@ class RouteTest extends TestCase
         $route = Route::put('/test', ['TestController', 'test']);
         $this->assertInstanceOf(Route::class, $route);
 
-        // Restore the original instance
         $instanceProperty->setValue(null, $originalInstance);
     }
 
@@ -107,7 +101,6 @@ class RouteTest extends TestCase
         $routerReflection = new \ReflectionClass(Router::class);
         $instanceProperty = $routerReflection->getProperty('instance');
         $instanceProperty->setAccessible(true);
-        // Store the original instance
         $originalInstance = $instanceProperty->getValue();
 
         $routerMock = $this->createMock(Router::class);
@@ -125,7 +118,6 @@ class RouteTest extends TestCase
         $route = Route::delete('/test', ['TestController', 'test']);
         $this->assertInstanceOf(Route::class, $route);
 
-        // Restore the original instance
         $instanceProperty->setValue(null, $originalInstance);
     }
 

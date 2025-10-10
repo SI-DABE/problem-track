@@ -13,7 +13,7 @@ class ProblemsAccessTest extends TestCase
     {
         parent::setUp();
         $this->client = new Client([
-            'allow_redirects' => false, // Disable following redirects
+            'allow_redirects' => false,
             'base_uri' => 'http://web:8080'
         ]);
     }

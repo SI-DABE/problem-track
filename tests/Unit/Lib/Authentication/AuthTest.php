@@ -8,6 +8,8 @@ use Tests\TestCase;
 
 class AuthTest extends TestCase
 {
+    protected $usesDatabase = true;
+    
     private User $user;
 
     public function setUp(): void

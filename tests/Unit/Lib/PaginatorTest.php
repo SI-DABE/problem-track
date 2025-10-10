@@ -9,6 +9,8 @@ use Tests\TestCase;
 
 class PaginatorTest extends TestCase
 {
+    protected $usesDatabase = true;
+    
     private Paginator $paginator;
     /** @var mixed[] $problems */
     private array $problems;

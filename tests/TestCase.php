@@ -7,15 +7,21 @@ use PHPUnit\Framework\TestCase as FrameworkTestCase;
 
 class TestCase extends FrameworkTestCase
 {
+    protected $usesDatabase = false;
+
     public function setUp(): void
     {
-        Database::create();
-        Database::migrate();
+        if ($this->usesDatabase) {
+            Database::create();
+            Database::migrate();
+        }
     }
 
     public function tearDown(): void
     {
-        Database::drop();
+        if ($this->usesDatabase) {
+            Database::drop();
+        }
     }
 
     protected function getOutput(callable $callable): string

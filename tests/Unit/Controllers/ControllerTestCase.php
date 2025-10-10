@@ -9,6 +9,8 @@ use ReflectionClass;
 
 abstract class ControllerTestCase extends TestCase
 {
+    protected $usesDatabase = true;
+    
     private Request $request;
 
     public function setUp(): void
@@ -78,8 +80,6 @@ abstract class ControllerTestCase extends TestCase
      */
     private function getControllerInstance(string $controllerName)
     {
-        // Generate a unique class name by appending a random hash to avoid naming conflicts
-        // when creating multiple test controller instances in the same test run
         $className = 'TestController' . md5(uniqid('', true));
 
         $code = "
