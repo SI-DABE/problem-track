@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\Access;
+namespace Tests\Integration\Access;
 
 use GuzzleHttp\Client;
 use PHPUnit\Framework\TestCase;

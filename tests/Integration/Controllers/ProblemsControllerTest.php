@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\Controllers;
+namespace Tests\Integration\Controllers;
 
 use App\Models\Problem;
 use App\Models\User;

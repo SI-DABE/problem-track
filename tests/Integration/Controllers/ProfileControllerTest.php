@@ -7,7 +7,7 @@ use Core\Constants\Constants;
 use GuzzleHttp\Client;
 use GuzzleHttp\Cookie\CookieJar;
 use GuzzleHttp\Exception\ServerException;
-use Tests\Unit\Controllers\ControllerTestCase;
+use Tests\Integration\Controllers\ControllerTestCase;
 
 class ProfileControllerTest extends ControllerTestCase
 {
