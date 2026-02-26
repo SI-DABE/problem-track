@@ -26,16 +26,19 @@ class ProblemsControllerTest extends ControllerTestCase
     {
         $problems[] = new Problem(['title' => 'Problem 1', 'user_id' => $this->user->id]);
         $problems[] = new Problem(['title' => 'Problem 2',  'user_id' => $this->user->id]);
+        $otherUserProblem = new Problem(['title' => 'Problem hidden', 'user_id' => $this->createOtherUser()->id]);
 
         foreach ($problems as $problem) {
             $problem->save();
         }
+        $otherUserProblem->save();
 
         $response = $this->get(action: 'index', controllerName: 'App\Controllers\ProblemsController');
 
         foreach ($problems as $problem) {
             $this->assertMatchesRegularExpression("/{$problem->title}/", $response);
         }
+        $this->assertDoesNotMatchRegularExpression("/{$otherUserProblem->title}/", $response);
     }
 
     public function test_show_problem(): void
@@ -64,6 +67,7 @@ class ProblemsControllerTest extends ControllerTestCase
         );
 
         $this->assertMatchesRegularExpression("/Location: \/problems/", $response);
+        $this->assertTrue(Problem::exists(['title' => 'Problema test', 'user_id' => $this->user->id]));
     }
 
     public function test_unsuccessfully_create_problem(): void
@@ -110,6 +114,9 @@ class ProblemsControllerTest extends ControllerTestCase
         );
 
         $this->assertMatchesRegularExpression("/Location: \/problems/", $response);
+        $updatedProblem = Problem::findById($problem->id);
+        $this->assertNotNull($updatedProblem);
+        $this->assertEquals('Problem updated', $updatedProblem->title);
     }
 
     public function test_unsuccessfully_update_problem(): void
@@ -125,5 +132,21 @@ class ProblemsControllerTest extends ControllerTestCase
         );
 
         $this->assertMatchesRegularExpression("/não pode ser vazio!/", $response);
+        $updatedProblem = Problem::findById($problem->id);
+        $this->assertNotNull($updatedProblem);
+        $this->assertEquals('Problem 1', $updatedProblem->title);
+    }
+
+    private function createOtherUser(): User
+    {
+        $user = new User([
+            'name' => 'User 2',
+            'email' => 'beltrano@example.com',
+            'password' => '123456',
+            'password_confirmation' => '123456'
+        ]);
+        $user->save();
+
+        return $user;
     }
 }

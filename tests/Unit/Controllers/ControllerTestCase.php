@@ -4,8 +4,8 @@ namespace Tests\Unit\Controllers;
 
 use Core\Constants\Constants;
 use Core\Http\Request;
+use Core\Router\Router;
 use Tests\TestCase;
-use ReflectionClass;
 
 abstract class ControllerTestCase extends TestCase
 {
@@ -14,6 +14,7 @@ abstract class ControllerTestCase extends TestCase
     public function setUp(): void
     {
         parent::setUp();
+        Router::reset();
         require Constants::rootPath()->join('config/routes.php');
 
         $_SERVER['REQUEST_METHOD'] = 'GET';
@@ -25,6 +26,10 @@ abstract class ControllerTestCase extends TestCase
     {
         unset($_SERVER['REQUEST_METHOD']);
         unset($_SERVER['REQUEST_URI']);
+        unset($_SERVER['HTTP_ACCEPT']);
+        unset($_SESSION['user']);
+        Router::reset();
+        parent::tearDown();
     }
 
     /**
