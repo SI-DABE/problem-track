@@ -14,7 +14,6 @@ class ProfileControllerTest extends ControllerTestCase
     private User $user;
     private string $avatarPath;
     private string $avatarUploadPath;
-    private string $avatarUploadDir;
 
     public function setUp(): void
     {
@@ -22,7 +21,6 @@ class ProfileControllerTest extends ControllerTestCase
         $this->createUser();
         $this->avatarPath = Constants::rootPath()->join('tests/files/avatar_test.jpg');
         $this->avatarUploadPath = Constants::rootPath()->join('public/assets/uploads/users/' . $this->user->id . '/avatar.jpg');
-        $this->avatarUploadDir = dirname($this->avatarUploadPath);
     }
 
     private function createUser(): void
@@ -79,7 +77,7 @@ class ProfileControllerTest extends ControllerTestCase
                 'cookies' => $cookieJar
             ]);
         } catch (ServerException $e) {
-            $responseBody = (string) $e->getResponse()?->getBody();
+            $responseBody = (string) $e->getResponse()->getBody();
             if (str_contains($responseBody, 'Permission denied')) {
                 $this->markTestSkipped('Upload path is not writable by the web container.');
             }
