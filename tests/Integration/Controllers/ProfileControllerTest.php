@@ -46,12 +46,11 @@ class ProfileControllerTest extends ControllerTestCase
         $this->assertMatchesRegularExpression("/{$this->user->email}/", $response);
     }
 
+    # To test work fine, you need to run the test with the following command:
+    # sudo chown -R www-data:www-data public/assets/uploads
+    # This will give the right permission to the upload directory
     public function test_update_avatar(): void
     {
-        if ((!is_dir($this->avatarUploadDir) && !@mkdir($this->avatarUploadDir, 0777, true)) || !is_writable($this->avatarUploadDir)) {
-            $this->markTestSkipped('Upload directory is not writable in the current environment.');
-        }
-
         $cookieJar = new CookieJar();
 
         $client = new Client([

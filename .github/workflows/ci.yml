@@ -33,6 +33,9 @@ jobs:
       - name: PHPUnit Units test
         run: ./run test tests/Unit
 
+      - name: Integration Tests
+        run: ./run test tests/Integration
+
   acceptance_tests:
     name: Acceptance Tests
     runs-on: ubuntu-latest
